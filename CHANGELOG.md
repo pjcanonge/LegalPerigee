@@ -5,6 +5,44 @@ Format: [Semantic Versioning](https://semver.org) — `MAJOR.MINOR.PATCH`
 
 ---
 
+## [1.3.0] — 2026-06-06
+
+### Added
+- **Parallel agent execution** — Court researcher and web researcher now run concurrently
+  via `ThreadPoolExecutor(max_workers=2)`, cutting investigation wall-clock time roughly
+  in half. The `_INTER_AGENT_PAUSE` between agents 1 and 2 has been removed; a single
+  0.5 s pre-documentor pause remains to let both futures flush before synthesis.
+- **Citation verification** (`utils/citation_verifier.py`) — Post-investigation pass that
+  checks every `court_filing` source in the report against the CourtListener API. Verified
+  / unverified counts shown in a banner above the report. Guards against AI-hallucinated
+  citations (cf. *Mata v. Avianca*, S.D.N.Y. 2023). Requires `COURTLISTENER_API_TOKEN`
+  in Keychain; gracefully skips with a warning if the token is absent.
+- **BM25 relevance ranking in Case Library** (`database/db.py`) — When a text query is
+  supplied, results are now ranked by `bm25(cases_fts)` (most relevant first) instead of
+  `filing_date DESC`. Also added prefix-match expansion so "discriminat" matches
+  "discrimination" and "discriminatory". Falls back to filing-date order if the FTS query
+  is malformed.
+- **GitHub Actions CI** (`.github/workflows/ci.yml`) — Three-job pipeline:
+  1. Syntax compile + core module import checks (Python 3.9 & 3.11 matrix)
+  2. pytest run (gracefully skips if no `tests/` directory exists yet)
+  3. Hardcoded-credential scan + `.gitignore` coverage check
+  Runs on every push to `main`/`develop` and on all pull requests.
+- `citation_verification` field added to `CaseIntelReport` (Optional[dict]) to carry
+  verification results through to the export/JSON tabs.
+
+### Changed
+- `orchestrator.py` — sequential agent pipeline replaced with parallel `ThreadPoolExecutor`
+  pattern; log messages updated with emoji progress indicators (⚡ ✅ ⚠️ 📝 🔍).
+- `database/db.py` — `search_cases()` refactored into two paths: BM25-ranked FTS path
+  (text query present) and filing-date path (no query). New `_fts_query()` helper handles
+  prefix expansion and quote pass-through.
+
+### Architecture note
+- FastAPI + React (v2) migration is already underway in `LegalPerigee-v2/`.
+  The Streamlit frontend receives bug fixes and incremental improvements while v2 matures.
+
+---
+
 ## [1.2.1] — 2026-06-06
 
 ### Fixed

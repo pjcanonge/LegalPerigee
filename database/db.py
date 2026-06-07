@@ -177,6 +177,30 @@ def count_cases(source: Optional[str] = None) -> int:
         return conn.execute("SELECT COUNT(*) FROM cases").fetchone()[0]
 
 
+def _fts_query(q: str) -> str:
+    """
+    Convert a plain-text query into an FTS5 query string.
+
+    Each whitespace-separated token becomes a prefix-matched phrase so that
+    partial words like "discriminat" match "discrimination" and "discriminatory".
+    Tokens that are already quoted (e.g. `"exact phrase"`) are passed through
+    unchanged so users can still pin exact strings.
+
+    Examples
+    --------
+    "wrongful termination"  →  "wrongful"* "termination"*
+    '"exact phrase" foo'    →  "exact phrase" "foo"*
+    """
+    tokens = []
+    for token in q.strip().split():
+        if token.startswith('"') and token.endswith('"'):
+            tokens.append(token)          # already a quoted phrase — pass through
+        else:
+            safe = token.replace('"', '""')
+            tokens.append(f'"{safe}"*')   # prefix-match
+    return " ".join(tokens)
+
+
 def search_cases(
     q: str = "",
     source: Optional[str] = None,
@@ -189,60 +213,77 @@ def search_cases(
     limit: int = 50,
     offset: int = 0,
 ) -> list[dict]:
-    """Full-text + column search. Returns list of dicts."""
+    """
+    Full-text + column search. Returns list of dicts.
+
+    When a text query is supplied the results are ranked by BM25 relevance
+    (most relevant first) rather than by filing date. This means a search for
+    "housing discrimination" surfaces the most on-topic cases at the top even
+    if a less relevant case was filed more recently.
+
+    When no text query is supplied the results are ordered by filing_date DESC
+    (newest first), which is the expected behaviour for browsing.
+    """
     with get_conn() as conn:
-        if q and q.strip():
-            # FTS query
-            safe_q = q.replace('"', '""')
-            base_ids = [
-                r["id"]
-                for r in conn.execute(
-                    "SELECT id FROM cases_fts WHERE cases_fts MATCH ? LIMIT 500",
-                    (safe_q,),
-                ).fetchall()
-            ]
-            if not base_ids:
-                return []
-            id_filter = f"AND id IN ({','.join('?'*len(base_ids))})"
-            params: list = list(base_ids)
-        else:
-            id_filter = ""
-            params = []
+        col_filters: list[str] = []
+        col_params:  list      = []
 
-        filters = []
         if source:
-            filters.append("source = ?")
-            params.append(source)
+            col_filters.append("source = ?")
+            col_params.append(source)
         if court:
-            filters.append("court LIKE ?")
-            params.append(f"%{court}%")
+            col_filters.append("court LIKE ?")
+            col_params.append(f"%{court}%")
         if case_type:
-            filters.append("case_type LIKE ?")
-            params.append(f"%{case_type}%")
+            col_filters.append("case_type LIKE ?")
+            col_params.append(f"%{case_type}%")
         if date_from:
-            filters.append("filing_date >= ?")
-            params.append(date_from)
+            col_filters.append("filing_date >= ?")
+            col_params.append(date_from)
         if date_to:
-            filters.append("filing_date <= ?")
-            params.append(date_to)
+            col_filters.append("filing_date <= ?")
+            col_params.append(date_to)
         if harm_type:
-            filters.append("harm_types LIKE ?")
-            params.append(f"%{harm_type}%")
+            col_filters.append("harm_types LIKE ?")
+            col_params.append(f"%{harm_type}%")
         if protected_class:
-            filters.append("protected_classes LIKE ?")
-            params.append(f"%{protected_class}%")
+            col_filters.append("protected_classes LIKE ?")
+            col_params.append(f"%{protected_class}%")
 
-        where = ("WHERE " + " AND ".join(filters)) if filters else ""
-        if id_filter:
-            where = (where + " " + id_filter).strip() if where else f"WHERE 1=1 {id_filter}"
+        if q and q.strip():
+            # ── FTS5 path: relevance-ranked via BM25 ─────────────────────────
+            fts_q = _fts_query(q.strip())
+            col_where = (" AND " + " AND ".join(col_filters)) if col_filters else ""
 
+            # Join cases_fts with cases so we can apply column filters and BM25
+            # bm25() returns negative values; ORDER BY bm25 ASC = most relevant first.
+            sql = f"""
+                SELECT c.*
+                FROM cases c
+                JOIN cases_fts f ON f.rowid = c.rowid
+                WHERE f.cases_fts MATCH ?{col_where}
+                ORDER BY bm25(f.cases_fts)
+                LIMIT ? OFFSET ?
+            """
+            params: list = [fts_q] + col_params + [limit, offset]
+
+            try:
+                rows = conn.execute(sql, params).fetchall()
+                return [dict(r) for r in rows]
+            except Exception:
+                # FTS5 MATCH can raise if the query string is malformed (e.g. bare *)
+                # Fall back to the column-only path rather than surfacing an error.
+                pass
+
+        # ── Column-only path: no text query (or FTS fallback) ────────────────
+        where = ("WHERE " + " AND ".join(col_filters)) if col_filters else ""
         sql = f"""
             SELECT * FROM cases {where}
             ORDER BY filing_date DESC
             LIMIT ? OFFSET ?
         """
-        params += [limit, offset]
-        rows = conn.execute(sql, params).fetchall()
+        col_params += [limit, offset]
+        rows = conn.execute(sql, col_params).fetchall()
         return [dict(r) for r in rows]
 
 

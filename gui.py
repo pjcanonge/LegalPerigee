@@ -1731,6 +1731,26 @@ with tab_investigate:
 
         st.markdown("<br>", unsafe_allow_html=True)
 
+        # ── Citation verification banner ───────────────────────────────────────
+        cv = getattr(report, "citation_verification", None)
+        if cv:
+            u_count = len(cv.get("unverified", []))
+            v_count = len(cv.get("verified", []))
+            total   = cv.get("total_checked", 0)
+            if total == 0:
+                st.info(f"🔍 **Citation Check:** {cv.get('note', '')}", icon="ℹ️")
+            elif u_count > 0:
+                st.warning(
+                    f"⚠️ **Citation Check:** {v_count}/{total} citations verified — "
+                    f"{u_count} unverified. {cv.get('note', '')}",
+                    icon="⚠️",
+                )
+            else:
+                st.success(
+                    f"✅ **Citation Check:** All {total} citation(s) verified in CourtListener.",
+                    icon="✅",
+                )
+
         # ── Tabs ──────────────────────────────────────────────────────────────
         t_dash, t_cases, t_notes, t_md, t_json = st.tabs([
             "📊 Dashboard", "🗂 Cases", "🔬 Notes", "📄 Export", "{ } JSON"

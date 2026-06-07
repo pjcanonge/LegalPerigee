@@ -1,0 +1,145 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main" ]
+
+# Cancel any in-progress run for the same branch when a newer push arrives
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Job 1: Syntax & Import checks ──────────────────────────────────────────
+  lint-and-import:
+    name: Syntax & Import check (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install dependencies
+        # Use --no-deps for heavy GUI / OS packages that don't build on Linux CI
+        run: |
+          python -m pip install --upgrade pip
+          # Install core + non-platform packages
+          pip install \
+            anthropic pydantic httpx beautifulsoup4 feedparser python-dotenv \
+            keyring pillow fpdf2 pandas openpyxl python-docx bleach \
+            fastapi uvicorn python-multipart pdfplumber
+          # pillow-heif requires libheif; skip gracefully in CI
+          pip install pillow-heif || echo "pillow-heif skipped (no libheif in CI)"
+          # pywebview is macOS/Windows only — skip in CI
+          pip install pywebview || echo "pywebview skipped (unsupported on ubuntu CI)"
+          # streamlit last — it pulls in a lot but we need it for import checks
+          pip install streamlit==1.50.0
+
+      - name: Compile all Python files (syntax check)
+        run: |
+          python -m compileall -q \
+            agents/ aggregator/ alerts/ analyzers/ database/ \
+            exporters/ models/ tools/ utils/ viewers/ \
+            main.py window.py
+
+      - name: Check core module imports
+        # Set dummy env vars so modules that read os.environ at import time don't crash
+        env:
+          ANTHROPIC_API_KEY: sk-test-ci-placeholder
+          COURTLISTENER_API_TOKEN: ""
+        run: |
+          python -c "from models.case_report   import CaseIntelReport, SearchFilters; print('models OK')"
+          python -c "from database.db           import init_db, search_cases;          print('database OK')"
+          python -c "from utils.citation_verifier import verify_report_citations;      print('citation_verifier OK')"
+          python -c "from utils.keychain        import load_all_keys;                  print('keychain OK')"
+          python -c "from utils.json_extract    import extract_json;                   print('json_extract OK')"
+          python -c "from utils.retry           import call_with_retry;                print('retry OK')"
+          python -c "from agents.orchestrator   import run_investigation;              print('orchestrator OK')"
+          python -c "from agents.documentor     import run_documentor;                 print('documentor OK')"
+
+  # ── Job 2: Unit tests (if any) ─────────────────────────────────────────────
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    needs: lint-and-import
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies + pytest
+        run: |
+          python -m pip install --upgrade pip
+          pip install \
+            anthropic pydantic httpx beautifulsoup4 feedparser python-dotenv \
+            keyring pillow fpdf2 pandas openpyxl python-docx bleach \
+            fastapi uvicorn python-multipart pdfplumber pytest pytest-cov
+          pip install pillow-heif || true
+          pip install streamlit==1.50.0
+
+      - name: Run unit tests
+        env:
+          ANTHROPIC_API_KEY: sk-test-ci-placeholder
+          COURTLISTENER_API_TOKEN: ""
+        run: |
+          # Run tests if a tests/ directory exists; gracefully skip if not
+          if [ -d "tests" ]; then
+            python -m pytest tests/ -v --tb=short --no-header \
+              --cov=. --cov-report=term-missing --cov-fail-under=0
+          else
+            echo "No tests/ directory found — skipping. Add tests/test_*.py to enable."
+          fi
+
+  # ── Job 3: Security scan ───────────────────────────────────────────────────
+  security:
+    name: Secret / credential scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for hardcoded credentials
+        # Fail if any file (outside .github/) contains an sk-ant- or real API key pattern
+        run: |
+          echo "Scanning for hardcoded API keys…"
+          if grep -r --include="*.py" --include="*.env" --include="*.json" \
+               -E "(sk-ant-[a-zA-Z0-9]{10,}|AKIA[A-Z0-9]{16}|ghp_[a-zA-Z0-9]{36})" \
+               --exclude-dir=".git" --exclude-dir=".venv" --exclude-dir=".github" \
+               . ; then
+            echo "❌ Hardcoded credential detected — do not commit API keys."
+            exit 1
+          else
+            echo "✅ No hardcoded credentials found."
+          fi
+
+      - name: Verify .gitignore covers secrets
+        run: |
+          required=(".env" "secrets.py" "data/cases.db")
+          missing=()
+          for entry in "${required[@]}"; do
+            if ! grep -q "$entry" .gitignore; then
+              missing+=("$entry")
+            fi
+          done
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "❌ .gitignore missing: ${missing[*]}"
+            exit 1
+          fi
+          echo "✅ .gitignore covers all required sensitive paths."

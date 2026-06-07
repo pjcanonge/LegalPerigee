@@ -136,6 +136,12 @@ class CaseIntelReport(BaseModel):
     summary: str             = Field(description="Executive summary of findings")
     investigator_notes: str  = Field(description="Analytical notes — patterns, gaps, caveats")
     sources_searched: list[str] = Field(default_factory=list)
+    # Citation verification results — populated by utils.citation_verifier post-pass.
+    # Keys: verified (list), unverified (list), skipped (int), total_checked (int), note (str).
+    citation_verification: Optional[dict] = Field(
+        default=None,
+        description="Post-pass citation verification results from CourtListener",
+    )
 
     def to_markdown(self) -> str:
         lines = [
