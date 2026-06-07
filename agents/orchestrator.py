@@ -146,6 +146,7 @@ def run_investigation(
         web_findings=web_findings,
         filters=filters,
         client=client,
+        log_cb=log_cb,   # forward live streaming tokens to the UI log
     )
     log(f"✅ Synthesis: {report.total_cases_found} cases, {report.high_severity_count} high severity")
 

@@ -5,6 +5,37 @@ Format: [Semantic Versioning](https://semver.org) — `MAJOR.MINOR.PATCH`
 
 ---
 
+## [1.4.0] — 2026-06-06
+
+### Added
+- **Streaming documentor output** (`agents/documentor.py`) — The synthesis step now uses
+  `client.messages.stream()` so partial token chunks are forwarded to `log_cb` in real
+  time. Users see progress ("Documentor: synthesizing… 240 chars") during the 20–40 s
+  synthesis step instead of a silent spinner. Automatically falls back to the blocking
+  `messages.create()` call if streaming is unavailable (e.g. proxy stripping SSE).
+  `log_cb` parameter added to `run_documentor()` signature; passed through from orchestrator.
+- **Test suite** (`tests/`) — 55 tests across 4 modules, all passing:
+  - `tests/test_db.py` (18 tests) — `_fts_query`, `upsert_case`, `count_cases`,
+    `search_cases` (FTS + column + mixed + fallback paths)
+  - `tests/test_case_report.py` (18 tests) — model defaults, enums, `SearchFilters`,
+    `to_markdown()` output, `citation_verification` round-trip
+  - `tests/test_citation_verifier.py` (9 tests) — verified, unverified, skipped, 429
+    rate-limit, network timeout, empty report (all HTTP mocked, no network required)
+  - `tests/test_orchestrator.py` (10 tests) — query builders, parallel execution, agent
+    error resilience, log_cb messages, citation attachment, missing API key
+
+### Fixed
+- `_fts_query()` now uses `shlex.split` to correctly handle multi-word quoted phrases
+  (`"civil rights"`) as single exact-match tokens rather than splitting them into
+  individual prefix-matched tokens.
+- `run_documentor()` accepts and forwards `log_cb` so streaming progress appears in the
+  investigation live log.
+
+### Changed
+- `orchestrator.py` passes `log_cb` to `run_documentor()`.
+
+---
+
 ## [1.3.0] — 2026-06-06
 
 ### Added

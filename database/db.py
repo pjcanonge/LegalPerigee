@@ -181,23 +181,33 @@ def _fts_query(q: str) -> str:
     """
     Convert a plain-text query into an FTS5 query string.
 
-    Each whitespace-separated token becomes a prefix-matched phrase so that
-    partial words like "discriminat" match "discrimination" and "discriminatory".
-    Tokens that are already quoted (e.g. `"exact phrase"`) are passed through
-    unchanged so users can still pin exact strings.
+    Uses shlex.split so multi-word quoted phrases (e.g. `"civil rights"`) are
+    treated as a single exact-match token rather than two separate prefix tokens.
+    Unquoted single words get a trailing `*` for prefix matching.
 
     Examples
     --------
-    "wrongful termination"  →  "wrongful"* "termination"*
-    '"exact phrase" foo'    →  "exact phrase" "foo"*
+    "wrongful termination"    →  "wrongful"* "termination"*
+    '"exact phrase" foo'      →  "exact phrase" "foo"*
+    '"civil rights" discrim'  →  "civil rights" "discrim"*
     """
+    import shlex
+
+    try:
+        parts = shlex.split(q.strip())
+    except ValueError:
+        # Unmatched quote — fall back to plain whitespace split
+        parts = q.strip().split()
+
     tokens = []
-    for token in q.strip().split():
-        if token.startswith('"') and token.endswith('"'):
-            tokens.append(token)          # already a quoted phrase — pass through
+    for part in parts:
+        safe = part.replace('"', '""')
+        if " " in part:
+            # Was a quoted multi-word phrase — keep as exact match (no wildcard)
+            tokens.append(f'"{safe}"')
         else:
-            safe = token.replace('"', '""')
-            tokens.append(f'"{safe}"*')   # prefix-match
+            # Single word — add prefix wildcard
+            tokens.append(f'"{safe}"*')
     return " ".join(tokens)
 
 

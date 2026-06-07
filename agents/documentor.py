@@ -3,15 +3,22 @@ Documentation Sub-Agent
 
 Synthesizes raw research findings from court and web researchers into
 a structured CaseIntelReport. Covers ALL case types — no AI restriction.
+
+v1.4 changes
+------------
+- Streaming output: uses client.messages.stream() so that partial token
+  chunks are forwarded to log_cb in real time, giving the user visible
+  progress during the synthesis step instead of a silent wait.
+- log_cb parameter added (Optional[Callable[[str], None]]).
+- Progress reported every _STREAM_CHUNK_CHARS characters accumulated.
 """
 
 import json
-from typing import Optional
+from typing import Callable, Optional
 
 import anthropic
 
 from models.case_report import CaseIntelReport, SearchFilters
-from utils.retry import call_with_retry
 from utils.json_extract import extract_json
 
 DOCUMENTOR_SYSTEM = """You are a legal documentation specialist. Synthesize research findings
@@ -38,6 +45,9 @@ Return exactly this JSON structure:
 # Max chars of combined research to send — prevents token overflow
 _MAX_RESEARCH_CHARS = 12_000
 
+# Forward a progress ping to log_cb every N streamed chars
+_STREAM_CHUNK_CHARS = 120
+
 
 def run_documentor(
     query: str,
@@ -45,12 +55,17 @@ def run_documentor(
     web_findings: dict,
     filters: Optional["SearchFilters"] = None,
     client: Optional[anthropic.Anthropic] = None,
+    log_cb: Optional[Callable[[str], None]] = None,
 ) -> CaseIntelReport:
     if client is None:
         api_key = __import__("os").environ.get("ANTHROPIC_API_KEY", "").strip()
         if not api_key or not api_key.startswith("sk-"):
             raise ValueError("Anthropic API key not configured.")
         client = anthropic.Anthropic(api_key=api_key)
+
+    def _log(msg: str) -> None:
+        if log_cb is not None:
+            log_cb(msg)
 
     # Truncate large research blobs to stay within token budget
     combined_raw = json.dumps(
@@ -69,8 +84,15 @@ def run_documentor(
         "Return ONLY the JSON — no prose, no fences."
     )
 
-    response = call_with_retry(
-        lambda: client.messages.create(
+    # ── Streaming synthesis ────────────────────────────────────────────────────
+    # We stream the documentor response so that partial tokens are forwarded to
+    # log_cb (and therefore appear in the live investigation log) rather than
+    # leaving the user staring at a silent spinner for 20–40 seconds.
+    raw_text = ""
+    _last_ping_at = 0  # char count at last progress ping
+
+    try:
+        with client.messages.stream(
             model="claude-sonnet-4-6",
             max_tokens=4096,
             system=[{
@@ -79,46 +101,72 @@ def run_documentor(
                 "cache_control": {"type": "ephemeral"},
             }],
             messages=[{"role": "user", "content": user_msg}],
-        ),
-        label="documentor",
-    )
+        ) as stream:
+            for chunk in stream.text_stream:
+                raw_text += chunk
+                # Forward a progress ping every _STREAM_CHUNK_CHARS characters
+                if len(raw_text) - _last_ping_at >= _STREAM_CHUNK_CHARS:
+                    _last_ping_at = len(raw_text)
+                    _log(f"📝 Documentor: synthesizing… ({len(raw_text)} chars)")
 
-    raw_text = ""
-    for block in response.content:
-        if block.type == "text" and block.text.strip():
-            raw_text = block.text
-            data = extract_json(block.text)
-            # Claude occasionally wraps the dict in a list — unwrap it
-            if isinstance(data, list) and data:
-                data = data[0] if isinstance(data[0], dict) else None
-            if isinstance(data, dict):
-                try:
-                    data["query"] = query
-                    if filters:
-                        data["filters_applied"] = filters.model_dump()
-                    findings = data.get("findings", [])
-                    data["total_cases_found"] = len(findings)
-                    data["high_severity_count"] = sum(
-                        1 for f in findings if f.get("severity") == "high"
-                    )
-                    return CaseIntelReport.model_validate(data)
-                except Exception as e:
-                    # Validation failed — return what we have with debug notes
-                    return CaseIntelReport(
-                        query=query,
-                        summary=data.get("summary", "Report generated with validation warnings."),
-                        investigator_notes=(
-                            data.get("investigator_notes", "") +
-                            f"\n\n[Validation note: {e}]"
-                        ),
-                        sources_searched=data.get("sources_searched", []),
-                    )
-            break  # had text but no JSON — fall through to fallback
+        _log(f"📝 Documentor: synthesis complete ({len(raw_text)} chars)")
 
-    # Fallback: build a minimal report from raw researcher data directly
-    court_cases  = court_findings.get("cases", [])
+    except Exception as stream_err:
+        # Streaming not available (e.g. proxy strips SSE) — fall back to blocking call
+        _log(f"⚠️ Streaming unavailable ({stream_err}), switching to blocking call…")
+        from utils.retry import call_with_retry
+        response = call_with_retry(
+            lambda: client.messages.create(
+                model="claude-sonnet-4-6",
+                max_tokens=4096,
+                system=[{
+                    "type": "text",
+                    "text": DOCUMENTOR_SYSTEM,
+                    "cache_control": {"type": "ephemeral"},
+                }],
+                messages=[{"role": "user", "content": user_msg}],
+            ),
+            label="documentor",
+        )
+        raw_text = ""
+        for block in response.content:
+            if block.type == "text" and block.text.strip():
+                raw_text = block.text
+                break
+
+    # ── Parse JSON from raw_text ───────────────────────────────────────────────
+    if raw_text.strip():
+        data = extract_json(raw_text)
+        # Claude occasionally wraps the dict in a list — unwrap it
+        if isinstance(data, list) and data:
+            data = data[0] if isinstance(data[0], dict) else None
+        if isinstance(data, dict):
+            try:
+                data["query"] = query
+                if filters:
+                    data["filters_applied"] = filters.model_dump()
+                findings = data.get("findings", [])
+                data["total_cases_found"] = len(findings)
+                data["high_severity_count"] = sum(
+                    1 for f in findings if f.get("severity") == "high"
+                )
+                return CaseIntelReport.model_validate(data)
+            except Exception as e:
+                # Validation failed — return what we have with debug notes
+                return CaseIntelReport(
+                    query=query,
+                    summary=data.get("summary", "Report generated with validation warnings."),
+                    investigator_notes=(
+                        data.get("investigator_notes", "") +
+                        f"\n\n[Validation note: {e}]"
+                    ),
+                    sources_searched=data.get("sources_searched", []),
+                )
+
+    # ── Fallback: build a minimal report from raw researcher data directly ─────
+    court_cases       = court_findings.get("cases", [])
     web_findings_list = web_findings.get("findings", [])
-    total = len(court_cases) + len(web_findings_list)
+    total             = len(court_cases) + len(web_findings_list)
 
     summary = (
         f"Research found {len(court_cases)} court case(s) and "
