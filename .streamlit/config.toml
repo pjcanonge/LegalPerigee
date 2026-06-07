@@ -1,0 +1,16 @@
+[server]
+runOnSave = false
+fileWatcherType = "none"
+headless = true
+port = 8501
+address = "localhost"
+
+[browser]
+gatherUsageStats = false
+
+[logger]
+level = "error"
+
+[client]
+showErrorDetails = false
+toolbarMode = "minimal"

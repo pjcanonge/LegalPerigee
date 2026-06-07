@@ -1,0 +1,154 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║         ⚖️  LegalPerigee  —  Quick Start Guide  ·  v1.1                    ║
+║         Full-Spectrum Legal Case Intelligence Platform                       ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  INSTALL IN 3 STEPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  macOS
+  ─────
+  1. Open  LegalPerigee-1.1-mac.dmg
+  2. Drag ⚖️ LegalPerigee  →  Applications folder
+  3. Double-click to launch
+     (First launch takes ~2 minutes to set up. Subsequent launches: ~5 seconds.)
+     If macOS blocks it: System Settings → Privacy & Security → Open Anyway
+
+  Windows
+  ───────
+  1. Unzip  LegalPerigee-1.1-windows.zip
+  2. Right-click  setup.ps1  →  Run with PowerShell
+  3. A Desktop shortcut is created. Double-click to open.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  NO ACCOUNT REQUIRED TO START
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  These features work immediately — no login, no API key:
+
+    ✅  Case Library        Browse & search 1,400+ cases from 20+ sources
+    ✅  Document Viewer     Open PDF, DOCX, XLSX, PPTX, images — with Print
+    ✅  Alerts              Monitor keywords, courts, and dockets by email
+    ✅  Legislative Watch   Track bills across all 50 states + Congress
+    ✅  Precedent Search    Search CourtListener and Harvard Caselaw directly
+
+  To unlock AI features (Investigation, Analysis, Media Forensics):
+    → Get a free key at  console.anthropic.com  →  API Keys
+    → In the app sidebar, click  🔑 Add Key  and paste your key
+    → The key is saved to macOS Keychain — you only enter it once
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  FEATURE REFERENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  🔍  INVESTIGATE  [AI — requires Anthropic key]
+      Describe any legal matter in plain English. The AI runs a multi-source
+      investigation across federal courts, agencies, and the web, then returns
+      a structured report with case findings, citations, and an executive summary.
+      Best for: Fast landscape research on an unfamiliar matter.
+      Export: PDF report or Word document from any investigation result.
+
+  📚  CASE LIBRARY  [Free]
+      Search and browse cases from CourtListener, SCOTUS, EEOC, FTC, SEC,
+      all 50 state AGs, Congress.gov, Harvard Caselaw (6.7M cases), and more.
+      Use Sync Manager to pull the latest cases from any source on demand.
+      Best for: Targeted searches by court, agency, date range, or keyword.
+
+  📊  LEGISLATIVE WATCH  [Free data + AI analysis]
+      Tracks bills across all 50 state legislatures and Congress in real time.
+      Detects multi-state legislative waves, federal pre-emption threats,
+      and fast-advancing bills. AI can analyze any bill's legal implications.
+      Best for: Monitoring regulatory exposure for clients in regulated industries.
+
+  ⚖️  PRECEDENT RESEARCH  [Free search + AI discovery]
+      Describe your legal situation and the AI identifies controlling precedents,
+      landmark cases, and how doctrine has evolved over time.
+      Direct CourtListener and Harvard CAP search work without AI.
+      Best for: Building case arguments, researching circuit splits.
+
+  🕵️  MEDIA FORENSICS  [AI — requires Anthropic key]
+      Upload images (JPG, PNG, HEIC/iPhone), video clips, or text documents.
+      AI analyzes for deepfakes, face swaps, AI-generated text, EXIF tampering,
+      GAN artifacts, clone stamps, and 12+ other manipulation indicators.
+      Best for: Authenticating evidence before relying on it in proceedings.
+      Note: Provides investigative leads. Obtain certified forensic analysis
+            for use in legal proceedings.
+
+  🔔  ALERTS  [Free]
+      Create keyword + court + state filter rules. Matching cases trigger
+      email notifications automatically. Integrates with CourtListener
+      real-time docket tracking.
+      Best for: Monitoring active litigation, tracking adversaries, new filings.
+
+  📂  DOCUMENT VIEWER  [Free]
+      Open PDF, DOCX, XLSX, PPTX, images, JSON, and text inside the app.
+      One-click Open in native app (Preview, Word, Excel) or Print with
+      professional print formatting. Supports HEIC iPhone photos.
+      Best for: Reviewing case documents and evidence files in-platform.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  DATA SOURCES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Federal Courts   CourtListener (all circuits + PACER) · Harvard Caselaw
+                   (6.7M cases, all states) · SCOTUS opinions
+  Regulatory       FTC · SEC · CFPB · EEOC · HUD · DOJ Civil Rights ·
+                   OFAC Sanctions
+  Legislative      Congress.gov · OpenStates (50 states) · GovTrack ·
+                   Federal Register · Regulations.gov dockets
+  State Courts     All 50 state AG opinions · NY NYSCEF · CA eCourt ·
+                   State appellate courts
+  International    EUR-Lex (EU) · UK ICO Decisions · Canada OPC Rulings
+  News             Legal news aggregator · Law360 · Reuters Legal
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  TIPS FOR BEST RESULTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Write queries in plain English.
+  "Excessive force lawsuits against Chicago PD 2020–2024" works better
+  than "police use of force." Include party names, statutes, agencies,
+  or dollar amounts when you have them.
+
+  Sync before you search.
+  First time using Case Library? Run a sync (Library → Sync Manager →
+  Run Selected Syncs). CourtListener and Harvard CAP alone cover
+  6.7 million cases across all U.S. jurisdictions.
+
+  Alerts save hours.
+  Set up an alert for a client's adversary or an active case name.
+  You get email notification the moment a new filing matches — no manual
+  checking required.
+
+  Authenticate evidence early.
+  Before relying on a photo or video in proceedings, run it through
+  Media Forensics. The AI checks 12+ deepfake indicators including
+  EXIF metadata and GAN artifacts.
+
+  Export for the file.
+  Every investigation can be exported as a formatted PDF memo or Word
+  document. Use the Export button after any investigation for a
+  citation-ready research document.
+
+  Optional integration keys raise rate limits.
+  CourtListener, Congress.gov, OpenStates, and Regulations.gov all
+  offer free API keys (no credit card) that increase the number of
+  cases you can sync. Add them in the sidebar under 🗝️ Integration Keys.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECURITY & PRIVACY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  All API keys are stored in macOS Keychain / Windows Credential Manager.
+  Keys are never written to files, logs, or source code.
+
+  The app runs entirely on your local machine. No case data, queries, or
+  client information is sent to any server except the APIs you explicitly
+  configure (CourtListener, Anthropic, etc.).
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ⚖️  LegalPerigee v1.1  ·  Ethical · Analytical · Evidence-Based
+      Results provide investigative leads — obtain certified analysis
+      for use in legal proceedings.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -1,0 +1,50 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── Environment / Secrets ─────────────────────────────────────────────────────
+# API keys are stored in macOS Keychain — NEVER in files
+.env
+*.env
+secrets.py
+
+# ── Local database (rebuilt by Sync Manager) ──────────────────────────────────
+data/cases.db
+data/cases.db-shm
+data/cases.db-wal
+data/*.db
+data/*.db-shm
+data/*.db-wal
+
+# ── Built installers & dist (attached as GitHub Release assets instead) ───────
+installers/macos/*.dmg
+installers/macos/.dmg_staging/
+installers/macos/.temp.dmg
+installers/windows/Output/
+dist/mac_staging/
+dist/win_staging/
+
+# ── macOS system files ────────────────────────────────────────────────────────
+.DS_Store
+**/.DS_Store
+*.AppleDouble
+*.LSOverride
+._*
+
+# ── Logs & temp ───────────────────────────────────────────────────────────────
+*.log
+/tmp/
+*.tmp
+
+# ── Editor & IDE ──────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo

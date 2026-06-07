@@ -1,0 +1,180 @@
+{
+  "findings": [
+    {
+      "severity": "INFO",
+      "category": "Network",
+      "description": "Streamlit bound to localhost only \u2705",
+      "file": "/Users/patrick_canonge/LegalPerigee/.streamlit/config.toml",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "INFO",
+      "category": "Network",
+      "description": "window.py binds streamlit to localhost \u2705",
+      "file": "/Users/patrick_canonge/LegalPerigee/window.py",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "INFO",
+      "category": "Network",
+      "description": "v2 FastAPI CORS is restricted \u2705",
+      "file": "/Users/patrick_canonge/LegalPerigee-v2/backend/main.py",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "INFO",
+      "category": "API Key",
+      "description": ".env contains no live API key \u2705",
+      "file": "/Users/patrick_canonge/LegalPerigee/.env",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "INFO",
+      "category": "API Key",
+      "description": "Keys stored in OS Keychain (macOS) / Credential Manager (Windows) \u2705",
+      "file": "/Users/patrick_canonge/LegalPerigee/utils/keychain.py",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "INFO",
+      "category": "Shell",
+      "description": "macOS launcher does not use xargs for .env \u2705",
+      "file": "/Users/patrick_canonge/Desktop/LegalPerigee.app/Contents/MacOS/LegalPerigee",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "LOW",
+      "category": "Shell",
+      "description": "Windows .bat loads .env with for/f \u2014 safe since we write the .env ourselves",
+      "file": "/Users/patrick_canonge/LegalPerigee/installers/windows/LegalPerigee.bat",
+      "line": 0,
+      "fix": "Acceptable risk \u2014 .env is application-controlled"
+    },
+    {
+      "severity": "INFO",
+      "category": "Auto-Repair",
+      "description": "Auto-repair validates syntax before writing any patch \u2705",
+      "file": "/Users/patrick_canonge/LegalPerigee/utils/auto_repair.py",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "INFO",
+      "category": "Auto-Repair",
+      "description": "Auto-repair creates backup before patching \u2705",
+      "file": "/Users/patrick_canonge/LegalPerigee/utils/auto_repair.py",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "INFO",
+      "category": "File Safety",
+      "description": "Document viewer uses Path() for safe filename handling \u2705",
+      "file": "/Users/patrick_canonge/LegalPerigee/viewers/document_viewer.py",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "INFO",
+      "category": "File Safety",
+      "description": "Document viewer has file size limits \u2705",
+      "file": "/Users/patrick_canonge/LegalPerigee/viewers/document_viewer.py",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "INFO",
+      "category": "Privileges",
+      "description": "App installs to user home directory \u2014 no admin/root required \u2705",
+      "file": "",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "INFO",
+      "category": "Privileges",
+      "description": "Database stored in ~/LegalPerigee/data/ \u2014 user-space only \u2705",
+      "file": "",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "INFO",
+      "category": "Privileges",
+      "description": "Keychain uses user keychain \u2014 no system keychain access required \u2705",
+      "file": "",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "INFO",
+      "category": "Privacy",
+      "description": "Case data stored locally in SQLite \u2014 never sent to external servers \u2705",
+      "file": "",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "INFO",
+      "category": "Privacy",
+      "description": "API calls go only to: Anthropic API, CourtListener, public legal databases \u2705",
+      "file": "",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "INFO",
+      "category": "Privacy",
+      "description": "No telemetry, analytics, or usage tracking built into app \u2705",
+      "file": "",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "INFO",
+      "category": "Privacy",
+      "description": "Streamlit telemetry disabled \u2705",
+      "file": "/Users/patrick_canonge/LegalPerigee/.streamlit/config.toml",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "INFO",
+      "category": "Dependencies",
+      "description": "All packages installed from PyPI \u2014 standard Python ecosystem \u2705",
+      "file": "",
+      "line": 0,
+      "fix": ""
+    },
+    {
+      "severity": "LOW",
+      "category": "Dependencies",
+      "description": "requirements.txt uses >= version ranges \u2014 could pull newer vulnerable versions",
+      "file": "/Users/patrick_canonge/LegalPerigee/requirements.txt",
+      "line": 0,
+      "fix": "Pin versions with == for production distribution (e.g. anthropic==0.40.0)"
+    },
+    {
+      "severity": "INFO",
+      "category": "Logs",
+      "description": "Log file exists: 0 KB \u2014 review periodically",
+      "file": "/Users/patrick_canonge/Library/Logs/LegalPerigee.log",
+      "line": 0,
+      "fix": "Logs contain API responses \u2014 clear periodically with: > ~/Library/Logs/LegalPerigee.log"
+    },
+    {
+      "severity": "INFO",
+      "category": "Logs",
+      "description": "No API keys detected in recent log entries \u2705",
+      "file": "",
+      "line": 0,
+      "fix": ""
+    }
+  ]
+}

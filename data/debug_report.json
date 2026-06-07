@@ -1,0 +1,457 @@
+{
+  "timestamp": "2026-06-06T17:01:25.863526Z",
+  "passed": 68,
+  "failed": 6,
+  "results": [
+    {
+      "name": "Python version (3.9+)",
+      "status": "PASS",
+      "detail": "3.9.6",
+      "ms": 0
+    },
+    {
+      "name": "anthropic SDK",
+      "status": "PASS",
+      "detail": "0.105.2",
+      "ms": 436
+    },
+    {
+      "name": "streamlit",
+      "status": "PASS",
+      "detail": "1.50.0",
+      "ms": 109
+    },
+    {
+      "name": "fastapi",
+      "status": "PASS",
+      "detail": "0.128.8",
+      "ms": 94
+    },
+    {
+      "name": "uvicorn",
+      "status": "PASS",
+      "detail": "0.39.0",
+      "ms": 10
+    },
+    {
+      "name": "pydantic",
+      "status": "PASS",
+      "detail": "2.13.4",
+      "ms": 0
+    },
+    {
+      "name": "httpx",
+      "status": "PASS",
+      "detail": "0.28.1",
+      "ms": 0
+    },
+    {
+      "name": "pandas",
+      "status": "PASS",
+      "detail": "2.3.3",
+      "ms": 353
+    },
+    {
+      "name": "pdfplumber",
+      "status": "PASS",
+      "detail": "0.11.8",
+      "ms": 123
+    },
+    {
+      "name": "python-docx",
+      "status": "PASS",
+      "detail": "1.2.0",
+      "ms": 50
+    },
+    {
+      "name": "python-pptx",
+      "status": "PASS",
+      "detail": "1.0.2",
+      "ms": 80
+    },
+    {
+      "name": "pillow",
+      "status": "PASS",
+      "detail": "11.3.0",
+      "ms": 0
+    },
+    {
+      "name": "pillow-heif",
+      "status": "PASS",
+      "detail": "1.1.1",
+      "ms": 29
+    },
+    {
+      "name": "reportlab",
+      "status": "PASS",
+      "detail": "4.5.1",
+      "ms": 0
+    },
+    {
+      "name": "keyring",
+      "status": "PASS",
+      "detail": "ok",
+      "ms": 0
+    },
+    {
+      "name": "altair",
+      "status": "PASS",
+      "detail": "5.5.0",
+      "ms": 172
+    },
+    {
+      "name": "pywebview",
+      "status": "PASS",
+      "detail": "ok",
+      "ms": 11
+    },
+    {
+      "name": "models.case_report",
+      "status": "PASS",
+      "detail": "dict_keys(['query', 'filters_applied', 'generated_at', 'findings', 'total_cases_found', 'high_severity_count', 'summary', 'investigator_notes', 'sources_searched'])",
+      "ms": 5
+    },
+    {
+      "name": "database.db",
+      "status": "PASS",
+      "detail": "init_db",
+      "ms": 4
+    },
+    {
+      "name": "utils.json_extract",
+      "status": "PASS",
+      "detail": "{'a': 1}",
+      "ms": 0
+    },
+    {
+      "name": "utils.retry",
+      "status": "PASS",
+      "detail": "call_with_retry",
+      "ms": 0
+    },
+    {
+      "name": "utils.keychain",
+      "status": "PASS",
+      "detail": "load_key",
+      "ms": 0
+    },
+    {
+      "name": "utils.auto_repair",
+      "status": "PASS",
+      "detail": "capture_error",
+      "ms": 0
+    },
+    {
+      "name": "tools.court_tools",
+      "status": "PASS",
+      "detail": "4 tools",
+      "ms": 0
+    },
+    {
+      "name": "tools.search_tools",
+      "status": "PASS",
+      "detail": "web_scrape",
+      "ms": 50
+    },
+    {
+      "name": "agents.court_researcher",
+      "status": "PASS",
+      "detail": "run_court_researcher",
+      "ms": 0
+    },
+    {
+      "name": "agents.web_researcher",
+      "status": "PASS",
+      "detail": "run_web_researcher",
+      "ms": 0
+    },
+    {
+      "name": "agents.documentor",
+      "status": "PASS",
+      "detail": "run_documentor",
+      "ms": 0
+    },
+    {
+      "name": "agents.orchestrator",
+      "status": "PASS",
+      "detail": "run_investigation",
+      "ms": 0
+    },
+    {
+      "name": "analyzers.media_analyzer",
+      "status": "PASS",
+      "detail": "analyze_text",
+      "ms": 1
+    },
+    {
+      "name": "analyzers.precedent_analyzer",
+      "status": "PASS",
+      "detail": "discover_precedents",
+      "ms": 0
+    },
+    {
+      "name": "analyzers.trend_analyzer",
+      "status": "PASS",
+      "detail": "detect_waves",
+      "ms": 0
+    },
+    {
+      "name": "analyzers.legislative_analyzer",
+      "status": "PASS",
+      "detail": "analyze_bill",
+      "ms": 0
+    },
+    {
+      "name": "viewers.document_viewer",
+      "status": "PASS",
+      "detail": "render_file",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.courtlistener_fetch",
+      "status": "PASS",
+      "detail": "run_full_sync",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.caselaw_fetch",
+      "status": "PASS",
+      "detail": "run_cap_sync",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.regulatory_fetch",
+      "status": "PASS",
+      "detail": "run_regulatory_sync",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.civil_rights_fetch",
+      "status": "PASS",
+      "detail": "run_civil_rights_sync",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.federal_register_fetch",
+      "status": "PASS",
+      "detail": "run_federal_register_sync",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.scotus_fetch",
+      "status": "PASS",
+      "detail": "run_scotus_sync",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.state_courts_fetch",
+      "status": "PASS",
+      "detail": "run_state_sync",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.all_states_fetch",
+      "status": "PASS",
+      "detail": "run_all_states_sync",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.congress_fetch",
+      "status": "PASS",
+      "detail": "run_congress_sync",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.legal_news_fetch",
+      "status": "PASS",
+      "detail": "run_legal_news_sync",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.edgar_fetch",
+      "status": "PASS",
+      "detail": "run_edgar_sync",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.regulations_docket_fetch",
+      "status": "PASS",
+      "detail": "run_regulations_sync",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.ofac_fetch",
+      "status": "PASS",
+      "detail": "run_ofac_sync",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.govtrack_fetch",
+      "status": "PASS",
+      "detail": "run_govtrack_sync",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.openstates_fetch",
+      "status": "PASS",
+      "detail": "run_openstates_sync",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.international_fetch",
+      "status": "PASS",
+      "detail": "run_international_sync",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.state_ecourts_fetch",
+      "status": "PASS",
+      "detail": "run_state_ecourts_sync",
+      "ms": 0
+    },
+    {
+      "name": "aggregator.courtlistener_alerts",
+      "status": "PASS",
+      "detail": "create_cl_search_alert",
+      "ms": 0
+    },
+    {
+      "name": "DB init + count",
+      "status": "PASS",
+      "detail": "1,419 cases, 9 sources indexed",
+      "ms": 13
+    },
+    {
+      "name": "DB search (empty query)",
+      "status": "PASS",
+      "detail": "5 results returned",
+      "ms": 0
+    },
+    {
+      "name": "DB full-text search",
+      "status": "PASS",
+      "detail": "FTS search returned 5 results",
+      "ms": 0
+    },
+    {
+      "name": "API key present + valid format",
+      "status": "PASS",
+      "detail": "Key present, length=108",
+      "ms": 0
+    },
+    {
+      "name": "Anthropic API ping (haiku)",
+      "status": "FAIL",
+      "detail": "anthropic.AuthenticationError: Error code: 401 - {'type': 'error', 'error': {'type': 'authentication_error', 'message': 'invalid x-api-key'}, 'request_id': 'req_011CbnN6qjAbjhoJXoS8xBhn'}",
+      "ms": 443,
+      "critical": true
+    },
+    {
+      "name": "Web search tool (sonnet)",
+      "status": "FAIL",
+      "detail": "anthropic.AuthenticationError: Error code: 401 - {'type': 'error', 'error': {'type': 'authentication_error', 'message': 'invalid x-api-key'}, 'request_id': 'req_011CbnN6sNdjQqtszrFVeYYL'}",
+      "ms": 342,
+      "critical": false
+    },
+    {
+      "name": "CourtListener REST API",
+      "status": "PASS",
+      "detail": "HTTP 200 \u2014 20 opinions returned",
+      "ms": 496
+    },
+    {
+      "name": "CourtListener token (optional \u2014 raises rate limits)",
+      "status": "FAIL",
+      "detail": "Exception: No token \u2014 add COURTLISTENER_API_TOKEN to .env for higher rate limits",
+      "ms": 0,
+      "critical": false
+    },
+    {
+      "name": "Harvard CAP search (CL fallback)",
+      "status": "PASS",
+      "detail": "3 cases (via CourtListener fallback \u2014 Harvard CAP API retired)",
+      "ms": 303
+    },
+    {
+      "name": "Court researcher agent",
+      "status": "FAIL",
+      "detail": "anthropic.AuthenticationError: Error code: 401 - {'type': 'error', 'error': {'type': 'authentication_error', 'message': 'invalid x-api-key'}, 'request_id': 'req_011CbnN6xSjUCKiLTs8Xvgqm'}",
+      "ms": 349,
+      "critical": false
+    },
+    {
+      "name": "Web researcher agent",
+      "status": "FAIL",
+      "detail": "anthropic.AuthenticationError: Error code: 401 - {'type': 'error', 'error': {'type': 'authentication_error', 'message': 'invalid x-api-key'}, 'request_id': 'req_011CbnN6ydAysfvbC2qLeWP9'}",
+      "ms": 317,
+      "critical": false
+    },
+    {
+      "name": "PDF text extraction (pdfplumber)",
+      "status": "PASS",
+      "detail": "PDF text extraction OK",
+      "ms": 32
+    },
+    {
+      "name": "DOCX round-trip (python-docx)",
+      "status": "PASS",
+      "detail": "DOCX read/write OK",
+      "ms": 22
+    },
+    {
+      "name": "JSON extractor (all patterns)",
+      "status": "PASS",
+      "detail": "4 parse patterns all correct",
+      "ms": 0
+    },
+    {
+      "name": "Trend analyzer (all functions)",
+      "status": "PASS",
+      "detail": "topics=0, waves=0, preemption=0",
+      "ms": 7
+    },
+    {
+      "name": "Precedent search (CL + CAP)",
+      "status": "PASS",
+      "detail": "CL=3 results, CAP=0 results",
+      "ms": 22224
+    },
+    {
+      "name": "Alert rules DB (create/list/delete)",
+      "status": "PASS",
+      "detail": "Create/list/delete cycle OK (id=3)",
+      "ms": 25
+    },
+    {
+      "name": "SMTP email (optional \u2014 needed for email alerts)",
+      "status": "FAIL",
+      "detail": "Exception: SMTP not configured \u2014 set ALERT_EMAIL_FROM + ALERT_EMAIL_PASSWORD in .env",
+      "ms": 12,
+      "critical": false
+    },
+    {
+      "name": "v2 backend main.py syntax",
+      "status": "PASS",
+      "detail": "FastAPI main.py syntax OK",
+      "ms": 5
+    },
+    {
+      "name": "v2 FastAPI app loads cleanly",
+      "status": "PASS",
+      "detail": "28 routes registered",
+      "ms": 37
+    },
+    {
+      "name": "gui.py syntax valid",
+      "status": "PASS",
+      "detail": "gui.py syntax OK (3,208 lines)",
+      "ms": 66
+    },
+    {
+      "name": "Streamlit server running (port 8501)",
+      "status": "PASS",
+      "detail": "Streamlit server responding (HTTP 200)",
+      "ms": 7
+    }
+  ]
+}

@@ -1,0 +1,598 @@
+{
+  "run_at": "2026-06-06T11:50:13.475354",
+  "summary": {
+    "passed": 97,
+    "failed": 1,
+    "skipped": 0
+  },
+  "results": [
+    {
+      "name": "Python 3.9+",
+      "status": "PASS",
+      "detail": "Python 3.9.6",
+      "ms": 0
+    },
+    {
+      "name": "Architecture (arm64)",
+      "status": "PASS",
+      "detail": "arm64",
+      "ms": 0
+    },
+    {
+      "name": "Package: anthropic",
+      "status": "PASS",
+      "detail": "anthropic",
+      "ms": 398
+    },
+    {
+      "name": "Package: streamlit",
+      "status": "PASS",
+      "detail": "streamlit",
+      "ms": 103
+    },
+    {
+      "name": "Package: pydantic",
+      "status": "PASS",
+      "detail": "pydantic",
+      "ms": 0
+    },
+    {
+      "name": "Package: httpx",
+      "status": "PASS",
+      "detail": "httpx",
+      "ms": 0
+    },
+    {
+      "name": "Package: pywebview",
+      "status": "PASS",
+      "detail": "webview",
+      "ms": 13
+    },
+    {
+      "name": "Package: keyring",
+      "status": "PASS",
+      "detail": "keyring",
+      "ms": 0
+    },
+    {
+      "name": "Package: fastapi",
+      "status": "PASS",
+      "detail": "fastapi",
+      "ms": 92
+    },
+    {
+      "name": "Package: uvicorn",
+      "status": "PASS",
+      "detail": "uvicorn",
+      "ms": 30
+    },
+    {
+      "name": "Package: pandas",
+      "status": "PASS",
+      "detail": "pandas",
+      "ms": 335
+    },
+    {
+      "name": "Package: pdfplumber",
+      "status": "PASS",
+      "detail": "pdfplumber",
+      "ms": 100
+    },
+    {
+      "name": "Package: python-docx",
+      "status": "PASS",
+      "detail": "docx",
+      "ms": 36
+    },
+    {
+      "name": "Package: python-pptx",
+      "status": "PASS",
+      "detail": "pptx",
+      "ms": 71
+    },
+    {
+      "name": "Package: pillow",
+      "status": "PASS",
+      "detail": "PIL",
+      "ms": 0
+    },
+    {
+      "name": "Package: pillow-heif",
+      "status": "PASS",
+      "detail": "pillow_heif",
+      "ms": 21
+    },
+    {
+      "name": "Package: reportlab",
+      "status": "PASS",
+      "detail": "reportlab",
+      "ms": 0
+    },
+    {
+      "name": "Package: fpdf2",
+      "status": "PASS",
+      "detail": "fpdf",
+      "ms": 164
+    },
+    {
+      "name": "Package: openpyxl",
+      "status": "PASS",
+      "detail": "openpyxl",
+      "ms": 66
+    },
+    {
+      "name": "Package: beautifulsoup4",
+      "status": "PASS",
+      "detail": "bs4",
+      "ms": 47
+    },
+    {
+      "name": "Package: python-dotenv",
+      "status": "PASS",
+      "detail": "dotenv",
+      "ms": 0
+    },
+    {
+      "name": "Package: altair",
+      "status": "PASS",
+      "detail": "altair",
+      "ms": 198
+    },
+    {
+      "name": "Keychain module loads",
+      "status": "PASS",
+      "detail": "ok",
+      "ms": 0
+    },
+    {
+      "name": "load_all_keys() injects to os.environ",
+      "status": "PASS",
+      "detail": "ok",
+      "ms": 9
+    },
+    {
+      "name": "No sensitive keys in .env",
+      "status": "PASS",
+      "detail": "clean",
+      "ms": 0
+    },
+    {
+      "name": "Case data models",
+      "status": "PASS",
+      "detail": "CaseIntelReport \u00b7 SearchFilters \u00b7 CaseFinding (all required fields)",
+      "ms": 6
+    },
+    {
+      "name": "orchestrator agent",
+      "status": "PASS",
+      "detail": "ok",
+      "ms": 3
+    },
+    {
+      "name": "court_researcher agent",
+      "status": "PASS",
+      "detail": "ok",
+      "ms": 0
+    },
+    {
+      "name": "web_researcher agent",
+      "status": "PASS",
+      "detail": "ok",
+      "ms": 0
+    },
+    {
+      "name": "documentor agent",
+      "status": "PASS",
+      "detail": "ok",
+      "ms": 0
+    },
+    {
+      "name": "CourtListener search (live)",
+      "status": "PASS",
+      "detail": "returned 2558 char formatted result",
+      "ms": 813
+    },
+    {
+      "name": "CourtListener headers",
+      "status": "PASS",
+      "detail": "headers: ['User-Agent']",
+      "ms": 0
+    },
+    {
+      "name": "JSON extractor (3 patterns)",
+      "status": "PASS",
+      "detail": "3/3 patterns",
+      "ms": 0
+    },
+    {
+      "name": "Agent no-key guard (clean error, no crash)",
+      "status": "PASS",
+      "detail": "returns clean error: 'Anthropic API key not configured.'",
+      "ms": 0
+    },
+    {
+      "name": "Media analyzer no-key guard (clean error, no crash)",
+      "status": "PASS",
+      "detail": "returns clean error: 'Anthropic API key not configured.'",
+      "ms": 23
+    },
+    {
+      "name": "Precedent analyzer no-key guard (ValueError, no crash)",
+      "status": "PASS",
+      "detail": "raises ValueError: 'Anthropic API key not configured. Enter your key in the app '",
+      "ms": 4
+    },
+    {
+      "name": "Court researcher agent (live)",
+      "status": "PASS",
+      "detail": "result type=dict",
+      "ms": 33939
+    },
+    {
+      "name": "Full investigation pipeline (live)",
+      "status": "FAIL",
+      "detail": "AttributeError: 'list' object has no attribute 'get'",
+      "ms": 267958
+    },
+    {
+      "name": "SQLite database (init + search)",
+      "status": "PASS",
+      "detail": "1,419 cases indexed",
+      "ms": 13
+    },
+    {
+      "name": "Full-text search (FTS5)",
+      "status": "PASS",
+      "detail": "FTS search returned 2 results",
+      "ms": 2
+    },
+    {
+      "name": "Aggregator: CourtListener (federal courts)",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 1
+    },
+    {
+      "name": "Aggregator: Harvard Caselaw (CL fallback)",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 0
+    },
+    {
+      "name": "Aggregator: FTC / SEC / CFPB",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 0
+    },
+    {
+      "name": "Aggregator: EEOC / HUD / DOJ civil rights",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 0
+    },
+    {
+      "name": "Aggregator: Federal Register",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 0
+    },
+    {
+      "name": "Aggregator: SCOTUS opinions",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 0
+    },
+    {
+      "name": "Aggregator: All 50 state courts",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 0
+    },
+    {
+      "name": "Aggregator: State eCourts (NY/CA)",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 0
+    },
+    {
+      "name": "Aggregator: State court opinions",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 0
+    },
+    {
+      "name": "Aggregator: Congress.gov bills",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 0
+    },
+    {
+      "name": "Aggregator: OpenStates (50 legislatures)",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 0
+    },
+    {
+      "name": "Aggregator: GovTrack (votes + bills)",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 0
+    },
+    {
+      "name": "Aggregator: SEC EDGAR filings",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 0
+    },
+    {
+      "name": "Aggregator: Regulations.gov dockets",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 0
+    },
+    {
+      "name": "Aggregator: OFAC sanctions",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 0
+    },
+    {
+      "name": "Aggregator: International (EU/UK/Canada)",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 0
+    },
+    {
+      "name": "Aggregator: Legal news",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 0
+    },
+    {
+      "name": "Aggregator: CourtListener real-time alerts",
+      "status": "PASS",
+      "detail": "imported",
+      "ms": 0
+    },
+    {
+      "name": "Trend analyzer (trends/waves/preemption/fast)",
+      "status": "PASS",
+      "detail": "trends=dict, waves=list",
+      "ms": 17
+    },
+    {
+      "name": "Legislative analyzer (AI bill analysis)",
+      "status": "PASS",
+      "detail": "analyze_bill callable",
+      "ms": 0
+    },
+    {
+      "name": "Wave detection engine",
+      "status": "PASS",
+      "detail": "wave detection returned list",
+      "ms": 1
+    },
+    {
+      "name": "Federal pre-emption tracker",
+      "status": "PASS",
+      "detail": "preemption tracker ok",
+      "ms": 1
+    },
+    {
+      "name": "CourtListener precedent search",
+      "status": "PASS",
+      "detail": "5 precedents found",
+      "ms": 1448
+    },
+    {
+      "name": "Harvard CAP \u2192 CourtListener fallback",
+      "status": "PASS",
+      "detail": "3 results (CAP\u2192CL fallback)",
+      "ms": 1952
+    },
+    {
+      "name": "AI precedent discovery (function)",
+      "status": "PASS",
+      "detail": "discover_precedents callable",
+      "ms": 0
+    },
+    {
+      "name": "Case comparison engine (function)",
+      "status": "PASS",
+      "detail": "compare_cases callable",
+      "ms": 0
+    },
+    {
+      "name": "Legal evolution tracker (function)",
+      "status": "PASS",
+      "detail": "analyze_legal_evolution callable",
+      "ms": 0
+    },
+    {
+      "name": "Media analyzer functions",
+      "status": "PASS",
+      "detail": "analyze_image \u00b7 analyze_text \u00b7 analyze_video",
+      "ms": 0
+    },
+    {
+      "name": "Image format support (JPEG/PNG/HEIC pipeline)",
+      "status": "PASS",
+      "detail": "PIL + HEIF registered",
+      "ms": 0
+    },
+    {
+      "name": "AI image forensics analysis (live)",
+      "status": "PASS",
+      "detail": "keys: ['verdict', 'confidence', 'manipulation_type', 'risk_level']",
+      "ms": 8240
+    },
+    {
+      "name": "AI text forensics analysis (live)",
+      "status": "PASS",
+      "detail": "keys: ['error']",
+      "ms": 4
+    },
+    {
+      "name": "PDF viewer (extract + print HTML)",
+      "status": "PASS",
+      "detail": "PDF text extraction + print HTML",
+      "ms": 32
+    },
+    {
+      "name": "DOCX viewer (render + print HTML)",
+      "status": "PASS",
+      "detail": "DOCX rendered + print HTML",
+      "ms": 23
+    },
+    {
+      "name": "XLSX/CSV viewer (table + print HTML)",
+      "status": "PASS",
+      "detail": "XLSX table \u2192 print HTML",
+      "ms": 3
+    },
+    {
+      "name": "PPTX viewer (slides + print HTML)",
+      "status": "PASS",
+      "detail": "PPTX slides \u2192 print HTML",
+      "ms": 12
+    },
+    {
+      "name": "Image viewer (PNG/JPG/HEIC/TIFF/SVG)",
+      "status": "PASS",
+      "detail": "PNG/JPEG/HEIC/TIFF/SVG all routed",
+      "ms": 0
+    },
+    {
+      "name": "JSON viewer",
+      "status": "PASS",
+      "detail": "JSON pretty-print viewer",
+      "ms": 0
+    },
+    {
+      "name": "Text / Markdown / HTML / code viewer",
+      "status": "PASS",
+      "detail": "TXT \u00b7 MD \u00b7 HTML code viewers",
+      "ms": 0
+    },
+    {
+      "name": "\u29c9 Open in system app (temp file + OS open)",
+      "status": "PASS",
+      "detail": "temp dir=/var/folders/lx/tj298q3x6c55j1bswtdt66k00000gn/T/LegalPerigee_docs, platform=Darwin",
+      "ms": 0
+    },
+    {
+      "name": "\ud83d\udda8\ufe0f Print view (auto-print HTML + toolbar)",
+      "status": "PASS",
+      "detail": "print HTML template verified",
+      "ms": 1
+    },
+    {
+      "name": "Alert rules (create / list / delete)",
+      "status": "PASS",
+      "detail": "create/list/delete ok (id=10)",
+      "ms": 14
+    },
+    {
+      "name": "Email alert sender (module + SMTP check)",
+      "status": "PASS",
+      "detail": "smtp_configured=False (needs ALERT_EMAIL_* in Keychain)",
+      "ms": 7
+    },
+    {
+      "name": "CourtListener real-time alert registration",
+      "status": "PASS",
+      "detail": "status=skipped",
+      "ms": 0
+    },
+    {
+      "name": "PDF report export (reportlab)",
+      "status": "PASS",
+      "detail": "4 KB PDF generated",
+      "ms": 45
+    },
+    {
+      "name": "Word report export (python-docx)",
+      "status": "PASS",
+      "detail": "36 KB DOCX generated",
+      "ms": 18
+    },
+    {
+      "name": "Auto-repair (error capture + syntax validation + backup)",
+      "status": "PASS",
+      "detail": "syntax-validated, backup-protected, 0 pending errors",
+      "ms": 1
+    },
+    {
+      "name": "Keychain save / load / delete roundtrip",
+      "status": "PASS",
+      "detail": "save\u2192load\u2192delete verified, 7 managed keys",
+      "ms": 37
+    },
+    {
+      "name": ".env file clean (no exposed secrets)",
+      "status": "PASS",
+      "detail": ".env has no sensitive keys \u2705",
+      "ms": 0
+    },
+    {
+      "name": "All 7 API keys in managed Keychain list",
+      "status": "PASS",
+      "detail": "7 keys managed: ANTHROPIC_API_KEY, COURTLISTENER_API_TOKEN, CONGRESS_API_KEY, OPENSTATES_API_KEY, REGULATIONS_GOV_KEY, ALERT_EMAIL_FROM, ALERT_EMAIL_PASSWORD",
+      "ms": 0
+    },
+    {
+      "name": "window.py (splash + background nav + key load)",
+      "status": "PASS",
+      "detail": "splash screen + background nav + Keychain load",
+      "ms": 1
+    },
+    {
+      "name": "first_run_check.sh (arm64 + DB + pkg upgrade)",
+      "status": "PASS",
+      "detail": "arch check + DB preserve + pkg hash",
+      "ms": 0
+    },
+    {
+      "name": "Streamlit server health check (:8501)",
+      "status": "PASS",
+      "detail": "Streamlit server responding on :8501",
+      "ms": 7
+    },
+    {
+      "name": "v2 FastAPI backend (25 endpoints)",
+      "status": "PASS",
+      "detail": "25 endpoints syntax-valid",
+      "ms": 2
+    },
+    {
+      "name": "v2 FastAPI app object loads cleanly",
+      "status": "PASS",
+      "detail": "28 routes registered",
+      "ms": 31
+    },
+    {
+      "name": "gui.py syntax + all 7 tabs present",
+      "status": "PASS",
+      "detail": "7 tabs \u00b7 syntax valid",
+      "ms": 79
+    },
+    {
+      "name": "Sidebar \u2014 all 7 API key fields present",
+      "status": "PASS",
+      "detail": "7 keys in sidebar \u2705",
+      "ms": 0
+    },
+    {
+      "name": "Release files (DMG + Windows ZIP)",
+      "status": "PASS",
+      "detail": "DMG=10.6MB  WIN=7.2MB",
+      "ms": 0
+    },
+    {
+      "name": "requirements.txt (all packages pinned ==)",
+      "status": "PASS",
+      "detail": "20 packages pinned to exact versions",
+      "ms": 0
+    }
+  ]
+}
