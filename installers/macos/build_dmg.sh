@@ -1,14 +1,17 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# LegalPerigee v1.1 — macOS DMG Builder
-# Output: installers/macos/LegalPerigee-1.1.dmg
+# LegalPerigee — macOS DMG Builder
+# VERSION is read from CHANGELOG.md or overridden via: VERSION=1.5.0 bash build_dmg.sh
 # ─────────────────────────────────────────────────────────────────────────────
 set -e
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 INSTALLER_DIR="$PROJECT_DIR/installers/macos"
 APP_NAME="LegalPerigee"
-VERSION="1.2"
+# Auto-detect version from the first ## [X.Y.Z] line in CHANGELOG.md
+if [ -z "$VERSION" ]; then
+    VERSION=$(grep -m1 '## \[' "$PROJECT_DIR/CHANGELOG.md" | sed 's/.*\[\(.*\)\].*/\1/')
+fi
 DMG_NAME="${APP_NAME}-${VERSION}.dmg"
 DMG_PATH="$INSTALLER_DIR/$DMG_NAME"
 APP_PATH="/Applications/${APP_NAME}.app"
@@ -40,15 +43,16 @@ arch -arm64 "$VENV_PYTHON" -c "
 from PIL import Image, ImageDraw
 import sys
 staging = sys.argv[1]
+# sys.argv[2] = VERSION
 W, H = 660, 400
 img = Image.new('RGBA', (W, H), (18, 28, 52))
 draw = ImageDraw.Draw(img)
 draw.rectangle([0, 0, W, 6], fill=(201, 168, 76))
 draw.text((115, 185), 'Drag  LegalPerigee  to  Applications', fill=(228, 217, 176))
 draw.text((155, 225), 'Then double-click to launch', fill=(143, 163, 191))
-draw.text((165, 265), 'v1.2 — Legal Case Intelligence', fill=(90, 120, 160))
+draw.text((165, 265), f'v{sys.argv[2]} — Legal Case Intelligence', fill=(90, 120, 160))
 img.convert('RGB').save(staging + '/.background.png')
-" "$STAGING"
+" "$STAGING" "$VERSION"
 
 rm -f "$DMG_PATH"
 TEMP_DMG="$INSTALLER_DIR/.temp.dmg"
