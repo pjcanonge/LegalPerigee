@@ -28,6 +28,14 @@ Format: [Semantic Versioning](https://semver.org) — `MAJOR.MINOR.PATCH`
 - **Real-time alerts toggle** (`gui.py`) — the Create Alert Rule form now has an
   "⚡ Real-time alerts" switch that picks `rate=rt` (notify on first match) vs `rate=dly`
   (daily digest) when registering the rule with CourtListener.
+- **Real-time setup tooling** (`scripts/setup_realtime.py`, `installers/REALTIME_SETUP.md`)
+  — one helper generates/persists the webhook secret, registers the tokenized callback
+  URL with CourtListener, and can create an rt alert (auto-detects a running ngrok tunnel).
+- **Auto-start services** (`installers/macos/com.legalperigee.webhook.plist`,
+  `install_webhook_receiver.sh`, `install_services.sh`) — a KeepAlive launchd agent runs
+  the webhook receiver on login; `install_services.sh` installs it alongside the
+  scheduled-sync agent. The receiver now loads `.env` itself so its token guard holds
+  under launchd's bare environment.
 
 ### Fixed
 - `list_cl_alerts()` / `delete_cl_alert()` referenced an undefined `CL_HEADERS`; now call

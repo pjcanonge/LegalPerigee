@@ -41,8 +41,22 @@ SOURCE = "courtlistener_webhook"
 app = FastAPI(title="LegalPerigee Webhook Receiver")
 
 
+def _load_env() -> None:
+    """Load .env so LP_WEBHOOK_TOKEN/PORT are present even under launchd, which
+    starts with a bare environment. Without this the token guard would silently
+    fall open. override=False so a real env var still wins."""
+    env_file = PROJECT_DIR / ".env"
+    if env_file.exists():
+        try:
+            from dotenv import load_dotenv
+            load_dotenv(dotenv_path=str(env_file), override=False)
+        except Exception:
+            pass
+
+
 @app.on_event("startup")
 def _startup() -> None:
+    _load_env()
     init_db()
 
 
@@ -127,6 +141,7 @@ async def courtlistener_webhook(request: Request) -> Response:
 
 def main() -> None:
     import uvicorn
+    _load_env()  # so LP_WEBHOOK_PORT is honored before the server binds
     port = int(os.getenv("LP_WEBHOOK_PORT", "8787"))
     uvicorn.run(app, host="0.0.0.0", port=port)
 

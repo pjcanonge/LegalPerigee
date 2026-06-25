@@ -68,6 +68,27 @@ curl https://something.trycloudflare.com/health
 # {"status":"ok","service":"legalperigee-webhook"}
 ```
 
+## Auto-start on login (optional)
+
+To have the receiver (and the scheduled incremental sync) come up automatically
+on every login, install the launchd agents:
+
+```bash
+bash installers/macos/install_services.sh        # both agents
+# or individually:
+bash installers/macos/install_webhook_receiver.sh   # always-on receiver
+bash installers/macos/install_scheduled_sync.sh     # 20-min incremental sync
+```
+
+The receiver agent uses `KeepAlive`, so it restarts if it ever exits. Uninstall
+with the same scripts plus `--uninstall`.
+
+> The launchd receiver still only receives pushes while a **public tunnel**
+> points at its port. For a fully hands-off setup, run a *named* cloudflared
+> tunnel as its own service (stable URL) and register that URL once with
+> `scripts/setup_realtime.py`; a free ephemeral tunnel must be re-registered
+> each time its URL changes.
+
 ## Notes
 
 - **The tunnel URL changes** each time you restart a free cloudflared/ngrok
