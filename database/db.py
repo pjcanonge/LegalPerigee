@@ -8,12 +8,20 @@ sync_log    — history of every aggregator run
 """
 
 import json
+import os
 import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator, Optional
 
-DB_PATH = Path(__file__).parent.parent / "data" / "cases.db"
+# Writable data location. A bundled .app ships its source read-only, so the
+# launcher points LP_DATA_DIR at ~/Library/Application Support/LegalPerigee/data.
+# Running from a normal checkout (no override) keeps the historical data/ path.
+_DATA_DIR = os.environ.get("LP_DATA_DIR")
+if _DATA_DIR:
+    DB_PATH = Path(_DATA_DIR) / "cases.db"
+else:
+    DB_PATH = Path(__file__).parent.parent / "data" / "cases.db"
 
 
 def init_db() -> None:

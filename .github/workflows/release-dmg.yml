@@ -1,0 +1,63 @@
+name: Build & attach macOS DMG
+
+# Builds the self-contained DMG on a real macOS runner (hdiutil is macOS-only)
+# and uploads it to the GitHub Release. Triggers when a release is published, or
+# manually via the Actions tab against an existing tag.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to attach the DMG to (e.g. v1.5.0)"
+        required: true
+  # Validate the macOS build on PRs that touch the builder (artifact only — no
+  # release upload), so we know it works before merging.
+  pull_request:
+    paths:
+      - "installers/macos/build_dmg.sh"
+      - ".github/workflows/release-dmg.yml"
+      - "requirements.txt"
+
+permissions:
+  contents: write
+
+jobs:
+  build-dmg:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Pillow (cosmetic DMG background)
+        run: python3 -m pip install --upgrade pip pillow
+
+      - name: Build self-contained DMG
+        run: bash installers/macos/build_dmg.sh
+
+      - name: Resolve release tag
+        id: tag
+        if: github.event_name != 'pull_request'
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          [ -z "$TAG" ] && TAG="${{ github.event.inputs.tag }}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Upload DMG to the release
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DMG="$(ls installers/macos/LegalPerigee-*.dmg | head -1)"
+          echo "Uploading $DMG to ${{ steps.tag.outputs.tag }}"
+          gh release upload "${{ steps.tag.outputs.tag }}" "$DMG" --clobber
+
+      - name: Also keep the DMG as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LegalPerigee-dmg
+          path: installers/macos/LegalPerigee-*.dmg
+          if-no-files-found: error
