@@ -27,11 +27,9 @@ from utils.auto_repair import (
 
 _AUTO_SYNC_INTERVAL_HOURS = 6   # re-sync if last sync was more than this long ago
 
-# "Fast" sources that auto-sync runs (skip heavy bulk downloads like OFAC/OpenStates)
-_AUTO_SYNC_SOURCES = [
-    "courtlistener", "ftc_sec_cfpb", "eeoc_hud_doj", "federal_register",
-    "sec_edgar", "reuters_legal", "scotusblog", "oyez_scotus",
-]
+# "Fast" sources that auto-sync runs (skip heavy bulk downloads like OFAC/OpenStates).
+# Defined in aggregator.sync_runner so the GUI and the scheduled job stay in lockstep.
+from aggregator.sync_runner import DEFAULT_SOURCES as _AUTO_SYNC_SOURCES
 
 _SYNC_STATE: dict = {
     "status": "idle",       # "idle" | "running" | "done" | "error"
@@ -68,70 +66,13 @@ def _run_background_sync(sources: list) -> None:
                              "added": 0, "updated": 0,
                              "started_at": time.time(), "log": []})
 
-    total_added = total_updated = 0
-
-    def _safe(label, fn, *args, **kwargs):
-        try:
-            return fn(*args, **kwargs)
-        except Exception as e:
-            _sync_prog(f"  ❌ {label}: {e}")
-            return {"added": 0, "updated": 0}
-
-    def _safe_ab(label, fn, *args, **kwargs):
-        try:
-            return fn(*args, **kwargs)
-        except Exception as e:
-            _sync_prog(f"  ❌ {label}: {e}")
-            return 0, 0
-
     try:
-        if "courtlistener" in sources:
-            from aggregator.courtlistener_fetch import run_full_sync
-            _sync_prog("Auto-sync: CourtListener…")
-            r = _safe("CourtListener", run_full_sync, max_per_query=30, progress_cb=_sync_prog)
-            total_added += r["added"]; total_updated += r["updated"]
-
-        if "ftc_sec_cfpb" in sources:
-            from aggregator.regulatory_fetch import run_regulatory_sync
-            _sync_prog("Auto-sync: FTC + SEC + CFPB…")
-            r = _safe("FTC/SEC/CFPB", run_regulatory_sync, progress_cb=_sync_prog)
-            total_added += r["added"]; total_updated += r["updated"]
-
-        if "eeoc_hud_doj" in sources:
-            from aggregator.civil_rights_fetch import run_civil_rights_sync
-            _sync_prog("Auto-sync: EEOC + HUD + DOJ…")
-            r = _safe("EEOC/HUD/DOJ", run_civil_rights_sync, progress_cb=_sync_prog)
-            total_added += r["added"]; total_updated += r["updated"]
-
-        if "federal_register" in sources:
-            from aggregator.federal_register_fetch import run_federal_register_sync
-            _sync_prog("Auto-sync: Federal Register…")
-            r = _safe("Federal Register", run_federal_register_sync, progress_cb=_sync_prog)
-            total_added += r["added"]; total_updated += r["updated"]
-
-        if "sec_edgar" in sources:
-            from aggregator.edgar_fetch import run_edgar_sync
-            _sync_prog("Auto-sync: SEC EDGAR…")
-            r = _safe("SEC EDGAR", run_edgar_sync, progress_cb=_sync_prog)
-            total_added += r["added"]; total_updated += r["updated"]
-
-        if "reuters_legal" in sources:
-            from aggregator.legal_news_fetch import fetch_reuters_legal
-            _sync_prog("Auto-sync: Reuters Legal…")
-            a, u = _safe_ab("Reuters Legal", fetch_reuters_legal, progress_cb=_sync_prog)
-            total_added += a; total_updated += u
-
-        if "scotusblog" in sources:
-            from aggregator.scotus_fetch import fetch_scotusblog
-            _sync_prog("Auto-sync: SCOTUSblog…")
-            a, u = _safe_ab("SCOTUSblog", fetch_scotusblog, progress_cb=_sync_prog)
-            total_added += a; total_updated += u
-
-        if "oyez_scotus" in sources:
-            from aggregator.scotus_fetch import fetch_oyez
-            _sync_prog("Auto-sync: Oyez SCOTUS…")
-            a, u = _safe_ab("Oyez", fetch_oyez, progress_cb=_sync_prog)
-            total_added += a; total_updated += u
+        from aggregator.sync_runner import run_sources
+        # incremental=True: only pull items newer than the last successful sync,
+        # so a frequent background run stays cheap.
+        result = run_sources(sources, progress_cb=_sync_prog, incremental=True)
+        total_added = result["added"]
+        total_updated = result["updated"]
 
         with _SYNC_LOCK:
             _SYNC_STATE.update({
@@ -4172,6 +4113,12 @@ with tab_alerts:
         with ar2:
             alert_courts = st.text_input("Courts (optional)", placeholder="e.g. SDNY, ca9")
             alert_states = st.text_input("States (optional)", placeholder="e.g. New York, California")
+            alert_realtime = st.toggle(
+                "⚡ Real-time alerts",
+                value=True,
+                help="On: CourtListener notifies you the moment a matching federal "
+                     "case is filed (rate=rt). Off: a once-daily digest (rate=dly).",
+            )
 
         if st.button("💾 Save Alert Rule", type="primary", use_container_width=True):
             if alert_name and alert_email:
@@ -4182,14 +4129,16 @@ with tab_alerts:
                     "states":     alert_states,
                     "harm_types": "",
                     "email":      alert_email,
+                    "rate":       "rt" if alert_realtime else "dly",
                 }
                 save_alert_rule(rule_data)
 
-                # Also register on CourtListener for real-time federal filings
+                # Also register on CourtListener — real-time or daily per the toggle
                 from aggregator.courtlistener_alerts import sync_alert_to_courtlistener
                 cl_result = sync_alert_to_courtlistener(rule_data)
+                _rate_label = "real-time" if alert_realtime else "daily-digest"
                 if cl_result.get("status") == "created":
-                    st.success(f"✅ Alert rule '{alert_name}' saved + registered on CourtListener (ID {cl_result.get('id')}) for real-time federal alerts.")
+                    st.success(f"✅ Alert rule '{alert_name}' saved + registered on CourtListener (ID {cl_result.get('id')}) for {_rate_label} federal alerts.")
                 elif cl_result.get("status") == "skipped":
                     st.success(f"✅ Alert rule '{alert_name}' saved.")
                     st.info("Add your CourtListener token in the sidebar → **Integration Keys** to enable real-time federal court email alerts.", icon="🏛️")

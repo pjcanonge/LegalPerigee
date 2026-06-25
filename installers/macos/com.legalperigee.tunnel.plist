@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  LegalPerigee — named cloudflared tunnel (launchd template).
+
+  Runs the stable named tunnel on login so the public hostname always points at
+  the local webhook receiver. RunAtLoad + KeepAlive (no StartInterval).
+
+  __CLOUDFLARED__  absolute path to the cloudflared binary
+  __CONFIG__       absolute path to ~/.cloudflared/legalperigee-config.yml
+  __TUNNEL_UUID__  the named tunnel UUID
+  __PROJECT_DIR__  project folder (for log paths)
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.legalperigee.tunnel</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>__CLOUDFLARED__</string>
+        <string>tunnel</string>
+        <string>--no-autoupdate</string>
+        <string>--config</string>
+        <string>__CONFIG__</string>
+        <string>run</string>
+        <string>__TUNNEL_UUID__</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>StandardOutPath</key>
+    <string>__PROJECT_DIR__/data/tunnel.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>__PROJECT_DIR__/data/tunnel.err.log</string>
+</dict>
+</plist>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  LegalPerigee — real-time webhook receiver (launchd template).
+
+  Long-lived server: RunAtLoad + KeepAlive so it starts on login and is
+  restarted if it ever exits. Unlike the sync agent there is NO StartInterval.
+
+  __PYTHON__       absolute path to the project .venv python3
+  __PROJECT_DIR__  absolute path to the LegalPerigee project folder
+
+  install_webhook_receiver.sh fills these in and loads the agent.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.legalperigee.webhook</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>__PYTHON__</string>
+        <string>-m</string>
+        <string>aggregator.webhook_receiver</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>__PROJECT_DIR__</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>StandardOutPath</key>
+    <string>__PROJECT_DIR__/data/webhook_receiver.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>__PROJECT_DIR__/data/webhook_receiver.err.log</string>
+</dict>
+</plist>

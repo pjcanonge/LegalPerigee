@@ -5,6 +5,49 @@ Format: [Semantic Versioning](https://semver.org) — `MAJOR.MINOR.PATCH`
 
 ---
 
+## [1.5.0] — 2026-06-25
+
+### Added — Timely data access
+- **Incremental sync** (`database/db.py`, `aggregator/courtlistener_fetch.py`) —
+  `incremental_filed_after()` / `last_successful_sync()` let syncs pull only items
+  newer than the last successful run (minus a 2-day overlap) instead of re-walking a
+  fixed 2-year window. `run_full_sync(..., incremental=True)` uses it.
+- **Shared sync runner** (`aggregator/sync_runner.py`) — single source-dispatch used by
+  both the GUI background thread and the headless job, so they never drift. `gui.py` now
+  delegates to it and runs incrementally.
+- **Scheduled background sync** (`scripts/scheduled_sync.py`,
+  `installers/macos/com.legalperigee.sync.plist`,
+  `installers/macos/install_scheduled_sync.sh`) — a launchd agent runs an incremental
+  sync every 20 minutes even when the app is closed, so freshness no longer depends on
+  the app being open.
+- **Real-time alerts + webhook** (`aggregator/courtlistener_alerts.py`,
+  `aggregator/webhook_receiver.py`) — alerts now default to `rate="rt"` (real-time);
+  `register_webhook()` registers a CourtListener push endpoint; a FastAPI receiver
+  ingests pushed docket activity straight into the DB (token-guarded via
+  `LP_WEBHOOK_TOKEN`).
+- **Real-time alerts toggle** (`gui.py`) — the Create Alert Rule form now has an
+  "⚡ Real-time alerts" switch that picks `rate=rt` (notify on first match) vs `rate=dly`
+  (daily digest) when registering the rule with CourtListener.
+- **Real-time setup tooling** (`scripts/setup_realtime.py`, `installers/REALTIME_SETUP.md`)
+  — one helper generates/persists the webhook secret, registers the tokenized callback
+  URL with CourtListener, and can create an rt alert (auto-detects a running ngrok tunnel).
+- **Auto-start services** (`installers/macos/com.legalperigee.webhook.plist`,
+  `install_webhook_receiver.sh`, `install_services.sh`) — a KeepAlive launchd agent runs
+  the webhook receiver on login; `install_services.sh` installs it alongside the
+  scheduled-sync agent. The receiver now loads `.env` itself so its token guard holds
+  under launchd's bare environment.
+- **Stable named tunnel** (`installers/macos/install_tunnel.sh`,
+  `com.legalperigee.tunnel.plist`, `cloudflared/config.template.yml`) — one command
+  creates/reuses a named cloudflared tunnel, routes a permanent hostname to the receiver,
+  runs it as a launchd agent, and registers the webhook URL once. Makes the full
+  real-time path hands-off across reboots (no URL re-registration).
+
+### Fixed
+- `list_cl_alerts()` / `delete_cl_alert()` referenced an undefined `CL_HEADERS`; now call
+  `_cl_headers()` so listing and deleting CourtListener alerts works.
+
+---
+
 ## [1.4.0] — 2026-06-06
 
 ### Added

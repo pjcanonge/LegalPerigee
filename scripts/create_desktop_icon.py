@@ -29,6 +29,30 @@ PROJECT_DIR = Path(__file__).parent.parent.resolve()
 DESKTOP      = Path.home() / "Desktop"
 APP_NAME     = "LegalPerigee"
 
+
+# ── Version detection ─────────────────────────────────────────────────────────
+
+def detect_version() -> tuple[str, str]:
+    """Read the latest version from CHANGELOG.md (same source as build_dmg.sh).
+
+    Returns (short_version, build) e.g. ("1.4.0", "14"). Falls back to
+    ("1.0", "1") if the changelog can't be parsed.
+    """
+    changelog = PROJECT_DIR / "CHANGELOG.md"
+    try:
+        for line in changelog.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            # First "## [X.Y.Z]" heading is the current release.
+            if line.startswith("## [") and "]" in line:
+                short = line[line.index("[") + 1:line.index("]")].strip()
+                parts = short.split(".")
+                if len(parts) >= 2 and parts[0].isdigit() and parts[1].isdigit():
+                    build = f"{parts[0]}{parts[1]}"  # 1.4.0 -> "14"
+                    return short, build
+    except OSError:
+        pass
+    return "1.0", "1"
+
 # ── Icon colors ───────────────────────────────────────────────────────────────
 NAVY        = (18, 28, 52)
 NAVY_MID    = (24, 38, 66)
@@ -303,9 +327,9 @@ INFO_PLIST = """\
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
+    <string>{version}</string>
     <key>CFBundleVersion</key>
-    <string>1</string>
+    <string>{build}</string>
     <key>LSMinimumSystemVersion</key>
     <string>12.0</string>
     <key>NSHighResolutionCapable</key>
@@ -318,72 +342,39 @@ INFO_PLIST = """\
 
 LAUNCHER_SCRIPT = """\
 #!/bin/bash
-# LegalPerigee launcher
+# LegalPerigee — Smart Launcher with conflict detection
 PROJECT_DIR="{project_dir}"
+VENV_DIR="$PROJECT_DIR/.venv"
 LOG_FILE="$HOME/Library/Logs/LegalPerigee.log"
+CHECKER="$PROJECT_DIR/installers/macos/first_run_check.sh"
+WINDOW_SCRIPT="$PROJECT_DIR/window.py"
 
-# ── Build a full PATH — macOS .app bundles start with a minimal environment ──
-export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
-export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
-for v in 3.13 3.12 3.11 3.10 3.9; do
-    export PATH="/opt/homebrew/opt/python@$v/bin:$PATH"
-done
-for py in python3 python3.13 python3.12 python3.11 python3.10 python3.9; do
-    base="$($py -m site --user-base 2>/dev/null)"
-    [ -n "$base" ] && export PATH="$base/bin:$PATH"
-done
-for profile in "$HOME/.zshrc" "$HOME/.zprofile" "$HOME/.bash_profile" "$HOME/.profile"; do
-    [ -f "$profile" ] && source "$profile" 2>/dev/null || true
-done
-
-# ── Change to project directory ───────────────────────────────────────────────
+# ── Verify project folder ─────────────────────────────────────────────────────
 cd "$PROJECT_DIR" 2>/dev/null || {{
-    osascript -e 'display alert "LegalPerigee" message "Project folder not found at {project_dir}" as critical'
+    osascript -e 'display alert "LegalPerigee" message "Project folder not found:\\n{project_dir}\\n\\nMove the LegalPerigee folder back to its original location." as critical'
     exit 1
 }}
 
-[ -f .env ] && export $(grep -v '^#' .env | xargs) 2>/dev/null
-
-# ── Locate streamlit ──────────────────────────────────────────────────────────
-STREAMLIT="$(command -v streamlit 2>/dev/null)"
-
-if [ -z "$STREAMLIT" ]; then
-    PYTHON="$(command -v python3 2>/dev/null)"
-    if [ -z "$PYTHON" ]; then
-        osascript -e 'display alert "LegalPerigee" message "Python 3 not found.\\n\\nInstall from python.org, then run:\\n\\n  pip3 install -r requirements.txt" as critical'
-        exit 1
+# ── Run conflict + health checker ─────────────────────────────────────────────
+if [ -f "$CHECKER" ]; then
+    chmod +x "$CHECKER"
+    bash "$CHECKER" "$PROJECT_DIR"
+    CHECK_EXIT=$?
+    if [ $CHECK_EXIT -ne 0 ]; then
+        # Checker already showed the error dialog — just exit
+        exit $CHECK_EXIT
     fi
-    osascript <<APPLESCRIPT
-tell application "Terminal"
-    activate
-    do script "echo '📦 Installing LegalPerigee dependencies…' && pip3 install -r '{project_dir}/requirements.txt' && echo '' && echo '✅ Done! Launching LegalPerigee…' && open '{project_dir}/LegalPerigee.app' 2>/dev/null || (cd '{project_dir}' && streamlit run gui.py)"
-end tell
-APPLESCRIPT
-    exit 0
 fi
 
-# ── Kill any existing instance on port 8501 ───────────────────────────────────
-lsof -ti:8501 | xargs kill -9 2>/dev/null || true
-sleep 0.4
+# ── Verify venv after checker ─────────────────────────────────────────────────
+PYTHON="$VENV_DIR/bin/python3"
+if [ ! -x "$PYTHON" ]; then
+    osascript -e 'display alert "LegalPerigee" message "Setup incomplete.\\n\\nOpen Terminal and run:\\n\\n  bash {project_dir}/setup.sh" as critical'
+    exit 1
+fi
 
-# ── Launch Streamlit ──────────────────────────────────────────────────────────
-mkdir -p "$(dirname "$LOG_FILE")"
-"$STREAMLIT" run gui.py \\
-    --server.headless true \\
-    --server.port 8501 \\
-    --browser.gatherUsageStats false \\
-    >> "$LOG_FILE" 2>&1 &
-SL_PID=$!
-echo "$(date): Started PID $SL_PID" >> "$LOG_FILE"
-
-# ── Wait until server responds (up to 20 s) ───────────────────────────────────
-for i in $(seq 1 40); do
-    curl -s http://localhost:8501 > /dev/null 2>&1 && break
-    sleep 0.5
-done
-
-open http://localhost:8501
+# ── Launch native window ──────────────────────────────────────────────────────
+exec arch -arm64 "$PYTHON" "$WINDOW_SCRIPT"
 """
 
 
@@ -397,10 +388,13 @@ def build_app_bundle(app_path: Path, icns_path: Path) -> None:
     macos_dir.mkdir(parents=True)
     resources_dir.mkdir(parents=True)
 
-    # Info.plist
+    # Info.plist — version/build read from CHANGELOG.md so the regenerated
+    # bundle always matches the latest release (the "final build").
+    version, build = detect_version()
     (app_path / "Contents" / "Info.plist").write_text(
-        INFO_PLIST.format(app_name=APP_NAME)
+        INFO_PLIST.format(app_name=APP_NAME, version=version, build=build)
     )
+    print(f"  Info.plist → v{version} (build {build})")
 
     # Icon
     if icns_path.exists():
