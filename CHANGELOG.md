@@ -5,6 +5,25 @@ Format: [Semantic Versioning](https://semver.org) — `MAJOR.MINOR.PATCH`
 
 ---
 
+## [Unreleased]
+
+### Added — Distributable macOS app
+- **Self-contained DMG** (`installers/macos/build_dmg.sh`) — rebuilt to bundle the
+  project source inside the `.app` (`Contents/Resources/app`) with a relocatable
+  launcher that creates its venv and stores its database under
+  `~/Library/Application Support/LegalPerigee`. The DMG now runs on any Mac instead
+  of depending on a project folder at a hardcoded path. Also drops `arch -arm64`,
+  finds/builds the app regardless of location, and surfaces `hdiutil` errors.
+- **CI DMG build** (`.github/workflows/release-dmg.yml`) — builds the DMG on a macOS
+  runner and attaches it to a published release (or on demand via the Actions tab);
+  also builds on PRs that touch the builder, as a pre-merge check.
+
+### Changed
+- `database/db.py` honors `LP_DATA_DIR` for the SQLite path so a read-only bundled
+  app can write to a user-writable location.
+
+---
+
 ## [1.5.0] — 2026-06-25
 
 ### Added — Timely data access
