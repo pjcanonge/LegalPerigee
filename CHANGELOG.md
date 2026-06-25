@@ -5,6 +5,18 @@ Format: [Semantic Versioning](https://semver.org) — `MAJOR.MINOR.PATCH`
 
 ---
 
+## [Unreleased]
+
+### Fixed
+- **DMG builder robustness** (`installers/macos/build_dmg.sh`) — finds
+  `LegalPerigee.app` in `/Applications` **or** `~/Desktop` (and builds it if absent)
+  instead of only `/Applications` where `create_desktop_icon.py` never puts it;
+  drops the hard `arch -arm64` (broke Intel Macs); makes the cosmetic background
+  image non-fatal when Pillow is missing; and surfaces `hdiutil` errors instead of
+  swallowing them.
+
+---
+
 ## [1.5.0] — 2026-06-25
 
 ### Added — Timely data access
