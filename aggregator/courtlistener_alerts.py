@@ -104,7 +104,7 @@ def list_cl_alerts() -> list[dict]:
     if not os.getenv("COURTLISTENER_API_TOKEN", ""):
         return []
     try:
-        r = httpx.get(f"{CL_BASE}/alerts/", headers=CL_HEADERS, timeout=15)
+        r = httpx.get(f"{CL_BASE}/alerts/", headers=_cl_headers(), timeout=15)
         r.raise_for_status()
         return r.json().get("results", [])
     except Exception:
@@ -116,10 +116,44 @@ def delete_cl_alert(alert_id: int) -> bool:
     if not os.getenv("COURTLISTENER_API_TOKEN", ""):
         return False
     try:
-        r = httpx.delete(f"{CL_BASE}/alerts/{alert_id}/", headers=CL_HEADERS, timeout=15)
+        r = httpx.delete(f"{CL_BASE}/alerts/{alert_id}/", headers=_cl_headers(), timeout=15)
         return r.status_code in (200, 204)
     except Exception:
         return False
+
+
+def register_webhook(url: str, event_type: int = 1) -> dict:
+    """Register a CourtListener webhook endpoint for push delivery.
+
+    With a webhook + real-time ('rt') alerts, CourtListener POSTs matching
+    results to `url` the moment they're found — no polling delay. This is the
+    lowest-latency path, but it requires a publicly reachable URL (see
+    aggregator/webhook_receiver.py for the receiver and how to expose it).
+
+    Args:
+        url:        Public HTTPS endpoint that will receive POSTs.
+        event_type: CourtListener webhook event type. 1 = docket alert,
+                    2 = search alert (see the CourtListener webhook docs).
+
+    Returns:
+        dict with 'status' and (on success) 'id'.
+    """
+    if not os.getenv("COURTLISTENER_API_TOKEN", ""):
+        return {"status": "skipped", "message": "No CourtListener API token"}
+    try:
+        r = httpx.post(
+            f"{CL_BASE}/webhooks/",
+            headers=_cl_headers(),
+            timeout=20,
+            json={"url": url, "event_type": event_type, "enabled": True},
+        )
+        r.raise_for_status()
+        data = r.json()
+        return {"status": "registered", "id": data.get("id"), "url": url}
+    except httpx.HTTPStatusError as e:
+        return {"status": "error", "error": f"HTTP {e.response.status_code}: {e.response.text[:200]}"}
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
 
 
 def sync_alert_to_courtlistener(rule: dict) -> dict:
@@ -145,7 +179,7 @@ def sync_alert_to_courtlistener(rule: dict) -> dict:
     result = create_cl_search_alert(
         name=f"LegalPerigee: {name}",
         query=query,
-        rate="dly",   # daily digest by default
-        alert_type="d",  # docket alerts
+        rate=rule.get("rate", "rt"),  # real-time by default — notify on first match
+        alert_type="d",               # docket alerts
     )
     return result

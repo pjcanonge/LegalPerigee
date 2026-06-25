@@ -215,6 +215,7 @@ def run_full_sync(
     max_per_query: int = 50,
     filed_after: Optional[str] = None,
     progress_cb: Optional[Callable[[str], None]] = None,
+    incremental: bool = False,
 ) -> dict:
     """
     Run a full CourtListener sync across all default queries.
@@ -224,6 +225,9 @@ def run_full_sync(
         max_per_query: Max cases per query (opinions + dockets)
         filed_after: Only fetch cases filed after this date (YYYY-MM-DD)
         progress_cb: Optional callback for progress messages
+        incremental: If True and `filed_after` is not given, start from the last
+            successful sync (minus a small overlap) instead of a fixed 2-year
+            window — far cheaper, so it can run on a tight schedule.
 
     Returns:
         Summary dict with totals
@@ -232,8 +236,14 @@ def run_full_sync(
         queries = DEFAULT_QUERIES
 
     if filed_after is None:
-        # Default: last 2 years
-        filed_after = (datetime.now() - timedelta(days=730)).strftime("%Y-%m-%d")
+        if incremental:
+            from database.db import incremental_filed_after
+            filed_after = incremental_filed_after(SOURCE)
+            if progress_cb:
+                progress_cb(f"Incremental: fetching filings since {filed_after}")
+        else:
+            # Default: last 2 years
+            filed_after = (datetime.now() - timedelta(days=730)).strftime("%Y-%m-%d")
 
     sync_id = log_sync_start(SOURCE)
     total_added = total_updated = 0

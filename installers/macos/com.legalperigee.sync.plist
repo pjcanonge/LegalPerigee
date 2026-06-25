@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  LegalPerigee — scheduled incremental sync (launchd template).
+
+  __PYTHON__       absolute path to the project .venv python3
+  __SYNC_SCRIPT__  absolute path to scripts/scheduled_sync.py
+  __PROJECT_DIR__  absolute path to the LegalPerigee project folder
+
+  install_scheduled_sync.sh fills these in and loads the agent. Runs every
+  20 minutes (StartInterval=1200) and once at load (RunAtLoad).
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.legalperigee.sync</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>__PYTHON__</string>
+        <string>__SYNC_SCRIPT__</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>__PROJECT_DIR__</string>
+
+    <key>StartInterval</key>
+    <integer>1200</integer>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>StandardOutPath</key>
+    <string>__PROJECT_DIR__/data/scheduled_sync.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>__PROJECT_DIR__/data/scheduled_sync.err.log</string>
+</dict>
+</plist>

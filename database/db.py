@@ -166,6 +166,48 @@ def log_sync_finish(sync_id: int, added: int, updated: int, status: str, msg: st
         )
 
 
+def last_successful_sync(source: str) -> Optional[str]:
+    """Return the started_at timestamp of the most recent *successful* sync for
+    `source` (ISO string like '2026-06-07 01:47:01'), or None if never synced.
+
+    Used to drive incremental fetches so each run only pulls items newer than
+    the last good sync instead of re-walking a fixed multi-year window.
+    """
+    with get_conn() as conn:
+        row = conn.execute(
+            """SELECT started_at FROM sync_log
+               WHERE source = ? AND status = 'success'
+               ORDER BY started_at DESC LIMIT 1""",
+            (source,),
+        ).fetchone()
+    return row["started_at"] if row else None
+
+
+def incremental_filed_after(
+    source: str,
+    default_days: int = 730,
+    overlap_days: int = 2,
+) -> str:
+    """Compute the `filed_after` date (YYYY-MM-DD) for an incremental sync.
+
+    - First run (no prior success): reach back `default_days` to seed the library.
+    - Subsequent runs: start from the last successful sync minus `overlap_days`,
+      so late-posted or back-dated filings near the boundary aren't missed.
+    """
+    import datetime as _dt
+
+    last = last_successful_sync(source)
+    if not last:
+        start = _dt.datetime.now() - _dt.timedelta(days=default_days)
+    else:
+        try:
+            last_dt = _dt.datetime.fromisoformat(last)
+        except ValueError:
+            last_dt = _dt.datetime.now() - _dt.timedelta(days=default_days)
+        start = last_dt - _dt.timedelta(days=overlap_days)
+    return start.strftime("%Y-%m-%d")
+
+
 # ── Read helpers ───────────────────────────────────────────────────────────────
 
 def count_cases(source: Optional[str] = None) -> int:
