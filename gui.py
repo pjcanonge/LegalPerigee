@@ -4113,6 +4113,12 @@ with tab_alerts:
         with ar2:
             alert_courts = st.text_input("Courts (optional)", placeholder="e.g. SDNY, ca9")
             alert_states = st.text_input("States (optional)", placeholder="e.g. New York, California")
+            alert_realtime = st.toggle(
+                "⚡ Real-time alerts",
+                value=True,
+                help="On: CourtListener notifies you the moment a matching federal "
+                     "case is filed (rate=rt). Off: a once-daily digest (rate=dly).",
+            )
 
         if st.button("💾 Save Alert Rule", type="primary", use_container_width=True):
             if alert_name and alert_email:
@@ -4123,14 +4129,16 @@ with tab_alerts:
                     "states":     alert_states,
                     "harm_types": "",
                     "email":      alert_email,
+                    "rate":       "rt" if alert_realtime else "dly",
                 }
                 save_alert_rule(rule_data)
 
-                # Also register on CourtListener for real-time federal filings
+                # Also register on CourtListener — real-time or daily per the toggle
                 from aggregator.courtlistener_alerts import sync_alert_to_courtlistener
                 cl_result = sync_alert_to_courtlistener(rule_data)
+                _rate_label = "real-time" if alert_realtime else "daily-digest"
                 if cl_result.get("status") == "created":
-                    st.success(f"✅ Alert rule '{alert_name}' saved + registered on CourtListener (ID {cl_result.get('id')}) for real-time federal alerts.")
+                    st.success(f"✅ Alert rule '{alert_name}' saved + registered on CourtListener (ID {cl_result.get('id')}) for {_rate_label} federal alerts.")
                 elif cl_result.get("status") == "skipped":
                     st.success(f"✅ Alert rule '{alert_name}' saved.")
                     st.info("Add your CourtListener token in the sidebar → **Integration Keys** to enable real-time federal court email alerts.", icon="🏛️")

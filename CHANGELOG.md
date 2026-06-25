@@ -5,7 +5,7 @@ Format: [Semantic Versioning](https://semver.org) — `MAJOR.MINOR.PATCH`
 
 ---
 
-## [Unreleased]
+## [1.5.0] — 2026-06-25
 
 ### Added — Timely data access
 - **Incremental sync** (`database/db.py`, `aggregator/courtlistener_fetch.py`) —
@@ -25,6 +25,9 @@ Format: [Semantic Versioning](https://semver.org) — `MAJOR.MINOR.PATCH`
   `register_webhook()` registers a CourtListener push endpoint; a FastAPI receiver
   ingests pushed docket activity straight into the DB (token-guarded via
   `LP_WEBHOOK_TOKEN`).
+- **Real-time alerts toggle** (`gui.py`) — the Create Alert Rule form now has an
+  "⚡ Real-time alerts" switch that picks `rate=rt` (notify on first match) vs `rate=dly`
+  (daily digest) when registering the rule with CourtListener.
 
 ### Fixed
 - `list_cl_alerts()` / `delete_cl_alert()` referenced an undefined `CL_HEADERS`; now call
