@@ -84,10 +84,41 @@ The receiver agent uses `KeepAlive`, so it restarts if it ever exits. Uninstall
 with the same scripts plus `--uninstall`.
 
 > The launchd receiver still only receives pushes while a **public tunnel**
-> points at its port. For a fully hands-off setup, run a *named* cloudflared
-> tunnel as its own service (stable URL) and register that URL once with
-> `scripts/setup_realtime.py`; a free ephemeral tunnel must be re-registered
-> each time its URL changes.
+> points at its port. A free ephemeral tunnel must be re-registered each time its
+> URL changes — for a fully hands-off setup, use the stable named tunnel below.
+
+## Fully hands-off: a stable named tunnel (recommended)
+
+A *named* cloudflared tunnel keeps the **same hostname** across reboots, so you
+register the webhook URL exactly once. One-time prerequisites (only you can do
+these — they need your Cloudflare login):
+
+```bash
+brew install cloudflared
+cloudflared tunnel login        # browser auth → ~/.cloudflared/cert.pem
+```
+
+You also need a domain in that Cloudflare account; pick a sub-hostname for the
+receiver (e.g. `webhook.yourdomain.com`). Then:
+
+```bash
+bash installers/macos/install_tunnel.sh webhook.yourdomain.com
+```
+
+That single command: creates (or reuses) a named tunnel `legalperigee`, routes
+the hostname's DNS to it, writes `~/.cloudflared/legalperigee-config.yml`,
+installs a KeepAlive launchd agent that runs the tunnel on every login, and
+registers `https://webhook.yourdomain.com/webhooks/courtlistener?token=…` with
+CourtListener **once**. Verify (give DNS a minute):
+
+```bash
+curl https://webhook.yourdomain.com/health
+```
+
+From then on the receiver, the tunnel, and the registration are all permanent —
+nothing to re-run after reboots. Combined with `install_services.sh` (receiver +
+scheduled sync), the whole real-time path comes up automatically. Uninstall with
+`install_tunnel.sh --uninstall`.
 
 ## Notes
 

@@ -1,0 +1,17 @@
+# LegalPerigee — cloudflared named-tunnel config (template).
+# install_tunnel.sh fills the placeholders and writes the real file to
+# ~/.cloudflared/legalperigee-config.yml.
+#
+#   __TUNNEL_UUID__  the named tunnel's UUID (from `cloudflared tunnel create`)
+#   __CRED_FILE__    ~/.cloudflared/<UUID>.json credentials written by create
+#   __HOSTNAME__     the public hostname routed to this tunnel (your CF domain)
+#   __PORT__         local port the webhook receiver listens on (default 8787)
+
+tunnel: __TUNNEL_UUID__
+credentials-file: __CRED_FILE__
+
+# Send the public hostname to the local receiver; everything else 404s.
+ingress:
+  - hostname: __HOSTNAME__
+    service: http://localhost:__PORT__
+  - service: http_status:404

@@ -36,6 +36,11 @@ Format: [Semantic Versioning](https://semver.org) — `MAJOR.MINOR.PATCH`
   the webhook receiver on login; `install_services.sh` installs it alongside the
   scheduled-sync agent. The receiver now loads `.env` itself so its token guard holds
   under launchd's bare environment.
+- **Stable named tunnel** (`installers/macos/install_tunnel.sh`,
+  `com.legalperigee.tunnel.plist`, `cloudflared/config.template.yml`) — one command
+  creates/reuses a named cloudflared tunnel, routes a permanent hostname to the receiver,
+  runs it as a launchd agent, and registers the webhook URL once. Makes the full
+  real-time path hands-off across reboots (no URL re-registration).
 
 ### Fixed
 - `list_cl_alerts()` / `delete_cl_alert()` referenced an undefined `CL_HEADERS`; now call
