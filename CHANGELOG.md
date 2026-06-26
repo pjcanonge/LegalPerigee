@@ -5,6 +5,34 @@ Format: [Semantic Versioning](https://semver.org) — `MAJOR.MINOR.PATCH`
 
 ---
 
+## [Unreleased]
+
+### Fixed — Legislative Watch
+- **Dead GovTrack source replaced** — GovTrack shut down its API in 2017, yet it
+  was the only legislative source checked on by default, so a default sync returned
+  zero bills. Replaced with **GovInfo** (`aggregator/govinfo_fetch.py`), GPO's
+  BILLSTATUS bulk data — federal bills with **no API key required**, refreshed every
+  ~4 hours. `aggregator/govtrack_fetch.py` removed.
+- **Congress.gov keyword search fixed** (`aggregator/congress_fetch.py`) — the `/bill`
+  endpoint has no full-text parameter, so the old `query=` was silently ignored and
+  every search term returned the same generic recent-bills list. Now pulls recent bills
+  per chamber/type and filters titles against the keyword list locally.
+- **OpenStates no longer capped at 10 states** (`aggregator/openstates_fetch.py`) — a
+  `jurisdictions[:10]` slice meant every state after Florida was never queried. Now
+  iterates all jurisdictions with 429 backoff and a configurable rate delay
+  (`OPENSTATES_RATE_DELAY`).
+- **Batch Triage queries bills directly** (`gui.py`) — was pulling 30 mixed rows then
+  post-filtering, so a court-heavy DB showed "no bills"; now queries legislative rows
+  by `case_type` at the SQL level.
+
+### Added
+- `scripts/diag_legislative.py` — probes each legislative source and reports
+  rows-returned / errors / DB counts, to verify the live numbers on a networked machine.
+- `tests/test_legislative.py` — offline tests for BILLSTATUS parsing, keyword filtering,
+  row mapping, and the OpenStates all-jurisdictions regression.
+
+---
+
 ## [1.5.0] — 2026-06-25
 
 ### Added — Timely data access

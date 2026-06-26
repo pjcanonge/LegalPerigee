@@ -184,7 +184,7 @@ aggs = [
     ("edgar_fetch",              "run_edgar_sync"),
     ("regulations_docket_fetch", "run_regulations_sync"),
     ("ofac_fetch",               "run_ofac_sync"),
-    ("govtrack_fetch",           "run_govtrack_sync"),
+    ("govinfo_fetch",            "run_govinfo_sync"),
     ("openstates_fetch",         "run_openstates_sync"),
     ("international_fetch",      "run_international_sync"),
     ("state_ecourts_fetch",      "run_state_ecourts_sync"),

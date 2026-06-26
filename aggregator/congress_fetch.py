@@ -72,15 +72,39 @@ def _bill_row(bill: dict) -> dict:
     }
 
 
+# Local keyword filter — the Congress.gov /bill endpoint has NO full-text search
+# parameter, so we pull recent bills and filter their titles ourselves.
+KEYWORDS = [
+    "civil rights", "discrimination", "voting", "police", "housing",
+    "consumer protection", "fraud", "privacy", "surveillance", "immigration",
+    "healthcare", "environmental justice", "disability", "labor", "education",
+    "artificial intelligence", "algorithm", "facial recognition", "predatory",
+    "data privacy", "reproductive", "hate crime", "criminal justice", "deepfake",
+]
+
+
+def title_matches(title: str, keywords=KEYWORDS) -> bool:
+    """True if any keyword appears in the bill title (pure function)."""
+    t = (title or "").lower()
+    return any(k in t for k in keywords)
+
+
 def fetch_congress_bills(
-    queries: Optional[list[str]] = None,
-    max_per_query: int = 20,
-    from_congress: int = 117,
+    bill_types: Optional[list[str]] = None,
+    max_per_type: int = 250,
+    congress: int = 119,
+    keywords=KEYWORDS,
     progress_cb: Optional[Callable[[str], None]] = None,
 ) -> tuple[int, int]:
+    """Pull recent federal bills per type and keyword-filter locally.
+
+    The previous implementation passed a `query=` param to `/bill`, but that
+    endpoint ignores it (Congress.gov has no full-text bill search API), so every
+    search term returned the same generic recent-bills list. We now request bills
+    by congress + bill type, newest first, and filter titles against `keywords`.
+    """
     added = updated = 0
     sync_id = log_sync_start(SOURCE)
-    queries = queries or AI_QUERIES
 
     if not os.getenv("CONGRESS_API_KEY", ""):
         if progress_cb:
@@ -88,28 +112,34 @@ def fetch_congress_bills(
         log_sync_finish(sync_id, 0, 0, "skipped", "No API key")
         return 0, 0
 
-    for q in queries:
-        if progress_cb: progress_cb(f"Congress: searching '{q}'")
-        try:
-            # M-3: API key sent via header, not URL query parameter
-            r = httpx.get(f"{BASE}/bill", headers=_congress_headers(), timeout=20, params={
-                "query": q,
-                "sort": "updateDate+desc",
-                "limit": max_per_query,
-                "fromDateTime": f"{from_congress * 2 + 1787}-01-01T00:00:00Z",
-            })
-            r.raise_for_status()
-            for bill in r.json().get("bills", []):
-                row = _bill_row(bill)
-                if upsert_case(row): added += 1
-                else: updated += 1
-        except Exception as e:
-            if progress_cb: progress_cb(f"  ⚠️ Congress error: {e}")
-        time.sleep(0.2)
+    bill_types = bill_types or ["hr", "s", "hjres", "sjres"]
+    try:
+        for bt in bill_types:
+            if progress_cb: progress_cb(f"Congress: {bt.upper()} (newest {max_per_type})")
+            try:
+                # M-3: API key sent via header, not URL query parameter
+                r = httpx.get(
+                    f"{BASE}/bill/{congress}/{bt}",
+                    headers=_congress_headers(), timeout=20,
+                    params={"sort": "updateDate+desc", "limit": min(max_per_type, 250)},
+                )
+                r.raise_for_status()
+                for bill in r.json().get("bills", []):
+                    if not title_matches(bill.get("title", ""), keywords):
+                        continue
+                    row = _bill_row(bill)
+                    if upsert_case(row): added += 1
+                    else: updated += 1
+            except Exception as e:
+                if progress_cb: progress_cb(f"  ⚠️ Congress {bt}: {e}")
+            time.sleep(0.2)
 
-    log_sync_finish(sync_id, added, updated, "success")
-    if progress_cb: progress_cb(f"Congress: +{added} new bills")
-    return added, updated
+        log_sync_finish(sync_id, added, updated, "success")
+        if progress_cb: progress_cb(f"Congress: +{added} new bills")
+        return added, updated
+    except Exception as e:
+        log_sync_finish(sync_id, added, updated, "error", str(e))
+        return added, updated
 
 
 def run_congress_sync(progress_cb=None) -> dict:

@@ -86,8 +86,15 @@ def fetch_bills(
     max_per_term: int = 50,
     since_date: str = "2020-01-01",
     progress_cb: Optional[Callable[[str], None]] = None,
+    max_jurisdictions: Optional[int] = None,
 ) -> tuple[int, int]:
-    """Fetch state bills matching a term across jurisdictions."""
+    """Fetch state bills matching a term across jurisdictions.
+
+    Previously this silently capped at the first 10 jurisdictions, so every
+    state after Florida was never queried. It now iterates ALL supplied
+    jurisdictions (optionally capped via `max_jurisdictions`), throttled to stay
+    within the OpenStates free-tier rate limit.
+    """
     if not os.getenv("OPENSTATES_API_KEY", ""):
         if progress_cb:
             progress_cb("OpenStates: no API key — add OPENSTATES_API_KEY to .env (free at openstates.org)")
@@ -95,22 +102,30 @@ def fetch_bills(
 
     added = updated = 0
     jurisdictions = jurisdictions or ["us"]   # default to just federal if none specified
+    if max_jurisdictions:
+        jurisdictions = jurisdictions[:max_jurisdictions]
 
-    for jur in jurisdictions[:10]:  # limit per call to avoid rate limits
+    # Free-tier friendly throttle (OpenStates limits to a few requests/sec and a
+    # daily cap). Override via OPENSTATES_RATE_DELAY if you have a higher tier.
+    delay = float(os.getenv("OPENSTATES_RATE_DELAY", "1.0"))
+
+    for jur in jurisdictions:
+        params = {
+            "q": term,
+            "jurisdiction": jur,
+            "sort": "updated_desc",
+            "per_page": min(max_per_term, 20),
+            "include": "sponsorships,actions",
+            "updated_since": since_date,
+        }
         try:
-            r = httpx.get(
-                f"{BASE}/bills",
-                headers=_os_headers(),
-                timeout=20,
-                params={
-                    "q": term,
-                    "jurisdiction": jur,
-                    "sort": "updated_desc",
-                    "per_page": min(max_per_term, 20),
-                    "include": "sponsorships,actions",
-                    "updated_since": since_date,
-                },
-            )
+            r = httpx.get(f"{BASE}/bills", headers=_os_headers(), timeout=20, params=params)
+            if r.status_code == 429:
+                # Respect Retry-After, then try once more before giving up.
+                wait = int(r.headers.get("Retry-After", "5") or "5")
+                if progress_cb: progress_cb(f"  ⏳ OpenStates rate-limited on {jur}; waiting {wait}s")
+                time.sleep(min(wait, 30))
+                r = httpx.get(f"{BASE}/bills", headers=_os_headers(), timeout=20, params=params)
             r.raise_for_status()
             for bill in r.json().get("results", []):
                 row = _bill_to_row(bill)
@@ -118,7 +133,7 @@ def fetch_bills(
                 else: updated += 1
         except Exception as e:
             if progress_cb: progress_cb(f"  ⚠️ OpenStates {jur}: {e}")
-        time.sleep(0.15)
+        time.sleep(delay)
 
     return added, updated
 
