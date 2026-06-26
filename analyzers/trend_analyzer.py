@@ -76,7 +76,7 @@ def get_legislative_bills(days_back: int = 365) -> list[dict]:
                WHERE (case_type LIKE '%legislat%'
                    OR case_type LIKE '%bill%'
                    OR case_type LIKE '%vote%'
-                   OR source IN ('congress','govtrack','openstates'))
+                   OR source IN ('congress','govtrack','govinfo','openstates'))
                AND (filing_date >= ? OR filing_date = '')
                ORDER BY filing_date DESC
                LIMIT 10000""",

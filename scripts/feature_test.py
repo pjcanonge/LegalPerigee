@@ -286,7 +286,7 @@ AGGREGATORS = [
     ("State court opinions",              "aggregator.state_courts_fetch",     "run_state_sync"),
     ("Congress.gov bills",                "aggregator.congress_fetch",         "run_congress_sync"),
     ("OpenStates (50 legislatures)",      "aggregator.openstates_fetch",       "run_openstates_sync"),
-    ("GovTrack (votes + bills)",          "aggregator.govtrack_fetch",         "run_govtrack_sync"),
+    ("GovInfo (federal bills)",           "aggregator.govinfo_fetch",          "run_govinfo_sync"),
     ("SEC EDGAR filings",                 "aggregator.edgar_fetch",            "run_edgar_sync"),
     ("Regulations.gov dockets",           "aggregator.regulations_docket_fetch","run_regulations_sync"),
     ("OFAC sanctions",                    "aggregator.ofac_fetch",             "run_ofac_sync"),

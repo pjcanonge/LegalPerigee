@@ -1030,7 +1030,7 @@ def _render_case_detail_page(case_id: str) -> None:
         "ftc": "🏢", "sec": "📈", "sec_edgar": "📊", "cfpb": "🏦",
         "eeoc": "👥", "hud": "🏠", "doj_civil_rights": "⚖️",
         "federal_register": "📋", "regulations_gov": "📝",
-        "ofac_sanctions": "🚫", "congress": "🏛️", "govtrack": "🗳️",
+        "ofac_sanctions": "🚫", "congress": "🏛️", "govtrack": "🗳️", "govinfo": "🏛️",
         "openstates": "🗺️", "ny_ag": "🗽", "ca_ag": "🌴", "tx_ag": "⭐",
         "fl_ag": "🌞", "wa_ag": "🌲", "il_ag": "🏙️", "ma_ag": "🦞",
         "eurlex": "🇪🇺", "uk_ico": "🇬🇧", "canada_opc": "🇨🇦",
@@ -1270,7 +1270,7 @@ def _render_case_detail_page(case_id: str) -> None:
                         )
 
         # ── Congress Bill Details ─────────────────────────────────────────────
-        if src in ("congress", "govtrack", "openstates"):
+        if src in ("congress", "govtrack", "govinfo", "openstates"):
             la = raw.get("latestAction") or {}
             if isinstance(la, dict) and (la.get("text") or la.get("actionDate")):
                 _section("🗳️", "Latest Legislative Action")
@@ -1377,7 +1377,7 @@ def _render_case_detail_page(case_id: str) -> None:
                     _kv_box(lbl, val)
 
         # ── Congress extra ────────────────────────────────────────────────────
-        if src in ("congress", "govtrack"):
+        if src in ("congress", "govtrack", "govinfo"):
             cg_parts = []
             if raw.get("type"):            cg_parts.append(("Bill Type",      raw["type"]))
             if raw.get("number"):          cg_parts.append(("Bill Number",    str(raw["number"])))
@@ -2120,7 +2120,7 @@ with tab_library:
                 ("sec_edgar",         "SEC EDGAR (8-K fraud disclosures, 10-K risk factors)", True),
                 ("ofac_sanctions",    "OFAC Treasury Sanctions List (SDN — 15K+ entities)",  False),
                 ("congress",          "Congress.gov — legislation (needs API key)",           False),
-                ("govtrack",          "GovTrack (bills, votes, member profiles)",             True),
+                ("govinfo",           "GovInfo — federal bills (no API key needed)",          True),
             ],
             "🗺️ State Courts & Legislatures": [
                 ("all_states",        "All 50 State AG offices",                             False),
@@ -2348,10 +2348,10 @@ with tab_library:
                 r = _run("OFAC", run_ofac_sync, progress_cb=_prog)
                 total_added += r["added"]; total_updated += r["updated"]
 
-            if "govtrack" in selected_sources:
-                from aggregator.govtrack_fetch import run_govtrack_sync
-                _prog("Starting GovTrack (bills + votes)…")
-                r = _run("GovTrack", run_govtrack_sync, progress_cb=_prog)
+            if "govinfo" in selected_sources:
+                from aggregator.govinfo_fetch import run_govinfo_sync
+                _prog("Starting GovInfo (federal bills — no key needed)…")
+                r = _run("GovInfo", run_govinfo_sync, progress_cb=_prog)
                 total_added += r["added"]; total_updated += r["updated"]
 
             if "openstates" in selected_sources:
@@ -2408,7 +2408,7 @@ with tab_library:
             "doj_civil_rights": "⚖️", "fcc": "📡", "occ": "🏦",
             "federal_register": "📋", "regulations_gov": "📝",
             "ofac_sanctions": "🚫", "congress": "🏛️",
-            "govtrack": "🗳️",
+            "govtrack": "🗳️", "govinfo": "🏛️",
             # State courts & AGs
             "ny_ag": "🗽", "ca_ag": "🌴", "tx_ag": "⭐",
             "fl_ag": "🌞", "wa_ag": "🌲", "il_ag": "🏙️",
@@ -2430,7 +2430,7 @@ with tab_library:
             "courtlistener":"CourtListener","harvard_cap":"Harvard CAP",
             "oyez_scotus":"SCOTUS/Oyez","federal_register":"Fed Register",
             "regulations_gov":"Regulations.gov","sec_edgar":"SEC EDGAR",
-            "ofac_sanctions":"OFAC Sanctions","govtrack":"GovTrack",
+            "ofac_sanctions":"OFAC Sanctions","govtrack":"GovTrack","govinfo":"GovInfo",
             "openstates":"OpenStates","eurlex":"EUR-Lex (EU)",
             "uk_ico":"UK ICO","canada_opc":"Canada OPC",
             "doj_civil_rights":"DOJ Civil Rights",
@@ -2585,7 +2585,7 @@ with tab_library:
                         "ftc": "🏢", "sec": "📈", "sec_edgar": "📊", "cfpb": "🏦",
                         "eeoc": "👥", "hud": "🏠", "doj_civil_rights": "⚖️",
                         "federal_register": "📋", "regulations_gov": "📝",
-                        "ofac_sanctions": "🚫", "congress": "🏛️", "govtrack": "🗳️",
+                        "ofac_sanctions": "🚫", "congress": "🏛️", "govtrack": "🗳️", "govinfo": "🏛️",
                         "openstates": "🗺️", "ny_ag": "🗽", "ca_ag": "🌴", "tx_ag": "⭐",
                         "fl_ag": "🌞", "wa_ag": "🌲", "il_ag": "🏙️", "ma_ag": "🦞",
                         "eurlex": "🇪🇺", "uk_ico": "🇬🇧", "canada_opc": "🇨🇦",
@@ -2937,7 +2937,7 @@ with tab_legwatch:
                 candidates = [c for c in candidates
                               if any(t in (c.get("case_type","") or "").lower()
                                      for t in ["legislat","bill","vote","act"])
-                              or c.get("source") in {"congress","govtrack","openstates"}]
+                              or c.get("source") in {"congress","govtrack","govinfo","openstates"}]
                 st.session_state["lw_candidates"] = candidates
 
             candidates = st.session_state.get("lw_candidates", [])
@@ -3047,11 +3047,12 @@ with tab_legwatch:
             st.caption("Quickly rate the harm potential of the most recent legislative bills in the database.")
             if st.button("▶️ Run Batch Triage", use_container_width=True, key="lw_triage_btn"):
                 from database.db import search_cases as _sc_lw
-                recent = [b for b in _sc_lw(limit=30)
-                          if b.get("source") in {"congress","govtrack","openstates"}
-                          or "legislat" in (b.get("case_type","") or "").lower()][:10]
+                # Query legislative rows directly (case_type LIKE '%Legislation%')
+                # instead of pulling 30 mixed rows and post-filtering — otherwise
+                # a court-heavy DB shows "no bills" even when bills exist.
+                recent = _sc_lw(case_type="Legislation", limit=10)
                 if not recent:
-                    st.info("No legislative bills in database. Sync Congress.gov or OpenStates first.", icon="📥")
+                    st.info("No legislative bills in database. Sync GovInfo (no key) or OpenStates first.", icon="📥")
                 else:
                     with st.spinner(f"Triaging {len(recent)} bills…"):
                         import anthropic as _ant_lw2
